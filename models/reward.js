@@ -27,7 +27,7 @@ module.exports = class Reward extends Sequelize.Model {
             // 리워드재고
             stock: {
                type: Sequelize.INTEGER,
-               allowNull: false,
+               allowNull: true,
             },
             // 인당제한
             limit: {
@@ -55,7 +55,7 @@ module.exports = class Reward extends Sequelize.Model {
          onDelete: 'CASCADE',
       })
       Reward.belongsToMany(db.RewardProduct, {
-         through: 'RewardProductRelation',
+         through: db.RewardProductRelation,
          foreignKey: 'rewardId',
          otherKey: 'productId',
          onDelete: 'CASCADE',
