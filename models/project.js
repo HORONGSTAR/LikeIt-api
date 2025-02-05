@@ -53,9 +53,10 @@ module.exports = class Project extends Sequelize.Model {
             projectStatus: {
                type: Sequelize.ENUM('ON_FUNDING', 'WAITING_FUNDING', 'FUNDING_COMPLETE', 'FUNDING_FAILED'),
             },
-            // 승인상태 (승인요청, 승인허가, 승인거부)
+            // 승인상태 (작성중, 승인요청, 승인허가, 승인거부)
             proposalStatus: {
-               type: Sequelize.ENUM('REVIEW_REQ', 'COMPLETE', 'DENIED'),
+               type: Sequelize.ENUM('WRITING', 'REVIEW_REQ', 'COMPLETE', 'DENIED'),
+               defaultValue: 'WRITING',
             },
          },
          {

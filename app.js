@@ -12,6 +12,9 @@ const cors = require('cors') // cors 미들웨어 -> api 서버는 반드시 설
 const { sequelize } = require('./models')
 const passportConfig = require('./passport') // passport 폴더에 index.js
 
+const indexRouter = require('./routes')
+const mainRouter = require('./routes/main')
+
 const app = express()
 passportConfig() // passport 실행
 app.set('port', process.env.PORT || 8002)
@@ -56,6 +59,8 @@ app.use(passport.initialize()) // 초기화
 app.use(passport.session()) // Passport와 생성해둔 세션 연결
 
 // 라우터 등록
+app.use('/', indexRouter)
+app.use('/main', mainRouter)
 
 // 잘못된 라우터 경로 처리
 app.use((req, res, next) => {

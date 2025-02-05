@@ -16,7 +16,7 @@ module.exports = class UserAccount extends Sequelize.Model {
                unique: true,
             },
             // 계정타입
-            default: {
+            accountType: {
                type: Sequelize.ENUM('GOOGLE', 'KAKAO'),
                allowNull: false,
             },

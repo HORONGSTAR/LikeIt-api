@@ -1,6 +1,6 @@
 const passport = require('passport')
 const local = require('./localStrategy')
-const User = require('../models/user')
+const User = require('../models/users')
 
 module.exports = () => {
    //직렬화(serializeUser): 로그인 성공 후 사용자 정보를 세션에 저장

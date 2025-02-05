@@ -26,7 +26,7 @@ const StudioCommunity = require('./studioCommunity')
 const StudioCommunityComment = require('./studioCommunityComment')
 const StudioCommunityImg = require('./studioCommunityImg')
 const StudioCreator = require('./studioCreator')
-const User = require('./user')
+const User = require('./users')
 const UserAccount = require('./userAccount')
 
 const db = {}
