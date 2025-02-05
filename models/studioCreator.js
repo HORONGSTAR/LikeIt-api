@@ -38,7 +38,7 @@ module.exports = class StudioCreator extends Sequelize.Model {
    }
 
    static associate(db) {
-      StudioCreator.hasMany(db.ProjectBudget, {
+      StudioCreator.hasMany(db.CreatorBudget, {
          foreignKey: 'studioCreatorId',
          sourceKey: 'id',
          onDelete: 'CASCADE',
