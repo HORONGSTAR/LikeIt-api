@@ -40,7 +40,7 @@ module.exports = class RewardProduct extends Sequelize.Model {
 
    static associate(db) {
       RewardProduct.belongsToMany(db.Reward, {
-         through: 'RewardProductRelation',
+         through: db.RewardProductRelation,
          foreignKey: 'productId',
          otherKey: 'rewardId',
          onDelete: 'CASCADE',

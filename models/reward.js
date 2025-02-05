@@ -55,7 +55,7 @@ module.exports = class Reward extends Sequelize.Model {
          onDelete: 'CASCADE',
       })
       Reward.belongsToMany(db.RewardProduct, {
-         through: 'RewardProductRelation',
+         through: db.RewardProductRelation,
          foreignKey: 'rewardId',
          otherKey: 'productId',
          onDelete: 'CASCADE',

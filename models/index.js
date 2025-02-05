@@ -20,13 +20,14 @@ const ProjectTimelineComment = require('./projectTimelineComment')
 const ProjectTimelineImg = require('./projectTimelineImg')
 const Reward = require('./reward')
 const RewardProduct = require('./rewardProduct')
+const RewardProductRelation = require('./rewardProductRelation')
 const Studio = require('./studio')
 const StudioAccount = require('./studioAccount')
 const StudioCommunity = require('./studioCommunity')
 const StudioCommunityComment = require('./studioCommunityComment')
 const StudioCommunityImg = require('./studioCommunityImg')
 const StudioCreator = require('./studioCreator')
-const User = require('./users')
+const User = require('./user')
 const UserAccount = require('./userAccount')
 
 const db = {}
@@ -51,6 +52,7 @@ db.ProjectTimelineComment = ProjectTimelineComment
 db.ProjectTimelineImg = ProjectTimelineImg
 db.Reward = Reward
 db.RewardProduct = RewardProduct
+db.RewardProductRelation = RewardProductRelation
 db.Studio = Studio
 db.StudioAccount = StudioAccount
 db.StudioCommunity = StudioCommunity
@@ -78,6 +80,7 @@ ProjectTimelineComment.init(sequelize)
 ProjectTimelineImg.init(sequelize)
 Reward.init(sequelize)
 RewardProduct.init(sequelize)
+RewardProductRelation.init(sequelize)
 Studio.init(sequelize)
 StudioAccount.init(sequelize)
 StudioCommunity.init(sequelize)
@@ -105,6 +108,7 @@ ProjectTimelineComment.associate(db)
 ProjectTimelineImg.associate(db)
 Reward.associate(db)
 RewardProduct.associate(db)
+RewardProductRelation.associate(db)
 Studio.associate(db)
 StudioAccount.associate(db)
 StudioCommunity.associate(db)
