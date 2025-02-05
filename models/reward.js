@@ -27,7 +27,7 @@ module.exports = class Reward extends Sequelize.Model {
             // 리워드재고
             stock: {
                type: Sequelize.INTEGER,
-               allowNull: false,
+               allowNull: true,
             },
             // 인당제한
             limit: {

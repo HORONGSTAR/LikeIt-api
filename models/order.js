@@ -65,5 +65,10 @@ module.exports = class Order extends Sequelize.Model {
          targetKey: 'id',
          onDelete: 'CASCADE',
       })
+      Order.belongsTo(db.Project, {
+         foreignKey: 'projectId',
+         targetKey: 'id',
+         onDelete: 'CASCADE',
+      })
    }
 }

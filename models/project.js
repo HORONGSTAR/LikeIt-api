@@ -84,6 +84,11 @@ module.exports = class Project extends Sequelize.Model {
          sourceKey: 'id',
          onDelete: 'CASCADE',
       })
+      Project.hasMany(db.Order, {
+         foreignKey: 'projectId',
+         sourceKey: 'id',
+         onDelete: 'CASCADE',
+      })
       Project.hasMany(db.ProjectTimeline, {
          foreignKey: 'projectId',
          sourceKey: 'id',

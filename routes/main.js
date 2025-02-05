@@ -3,7 +3,7 @@ const router = express.Router()
 const fs = require('fs')
 
 const { BannerProject, Project, Reward, Order } = require('../models')
-const { Sequelize } = require('sequelize')
+const { Sequelize, Op, fn, col, literal } = require('sequelize')
 
 // uploads 폴더가 없을 경우 새로 생성
 try {
@@ -28,20 +28,49 @@ router.get('/banner', async (req, res) => {
    }
 })
 
-// 프로젝트 호출
+// 프로젝트 정렬 호출 (페이징+검색(구현중))
 router.get('/list/:type', async (req, res) => {
    try {
-      const { type } = req.params // hot, new, end, comming
-      const whereClause = {}
-      const orderClause = {}
+      const page = parseInt(req.query.page, 10) || 1
+      const limit = parseInt(req.query.limit, 10) || 4
+      const offset = (page - 1) * limit
 
-      const projects = await Project.findAll({
-         include: [
-            {
-               model: Reward,
-               include: [{ model: Order }],
-            },
-         ],
+      const { type } = req.params // hot, new, end, comming, all
+
+      const count = await Project.count()
+
+      const projects = []
+
+      // 인기 프로젝트
+      if (type == 'hot' || type == 'all') {
+         const tempProject = await Project.findAll({
+            limit,
+            offset,
+            include: [
+               {
+                  model: Reward,
+                  include: [
+                     {
+                        model: Order,
+                        attributes: ['orderPrice'],
+                     },
+                  ],
+               },
+            ],
+         })
+         projects.push(tempProject)
+      }
+
+      res.json({
+         success: true,
+         message: '프로젝트 목록 조회 성공',
+         projects,
+         pagination: {
+            totalProjects: count,
+            totalPages: Math.ceil(count / limit),
+            currentPage: page,
+            limit,
+         },
       })
    } catch (error) {
       console.error(error)
