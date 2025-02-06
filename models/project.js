@@ -29,6 +29,11 @@ module.exports = class Project extends Sequelize.Model {
                type: Sequelize.TEXT,
                allowNull: false,
             },
+            // 이미지
+            imgUrl: {
+               type: Sequelize.STRING(100),
+               allowNull: false,
+            },
             // 관리자메모(미승인시 사유)
             adminMemo: {
                type: Sequelize.STRING(500),
@@ -85,11 +90,6 @@ module.exports = class Project extends Sequelize.Model {
          onDelete: 'CASCADE',
       })
       Project.hasMany(db.ProjectTimeline, {
-         foreignKey: 'projectId',
-         sourceKey: 'id',
-         onDelete: 'CASCADE',
-      })
-      Project.hasMany(db.ProjectImg, {
          foreignKey: 'projectId',
          sourceKey: 'id',
          onDelete: 'CASCADE',

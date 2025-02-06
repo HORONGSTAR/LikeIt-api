@@ -13,7 +13,6 @@ const Order = require('./order')
 const Point = require('./point')
 const Project = require('./project')
 const ProjectBudget = require('./projectBudget')
-const ProjectImg = require('./projectImg')
 const ProjectReview = require('./projectReview')
 const ProjectReviewImg = require('./projectReviewImg')
 const ProjectTimeline = require('./projectTimeline')
@@ -46,7 +45,6 @@ db.Order = Order
 db.Point = Point
 db.Project = Project
 db.ProjectBudget = ProjectBudget
-db.ProjectImg = ProjectImg
 db.ProjectReview = ProjectReview
 db.ProjectReviewImg = ProjectReviewImg
 db.ProjectTimeline = ProjectTimeline
@@ -75,7 +73,6 @@ Order.init(sequelize)
 Point.init(sequelize)
 Project.init(sequelize)
 ProjectBudget.init(sequelize)
-ProjectImg.init(sequelize)
 ProjectReview.init(sequelize)
 ProjectReviewImg.init(sequelize)
 ProjectTimeline.init(sequelize)
@@ -104,7 +101,6 @@ Order.associate(db)
 Point.associate(db)
 Project.associate(db)
 ProjectBudget.associate(db)
-ProjectImg.associate(db)
 ProjectReview.associate(db)
 ProjectReviewImg.associate(db)
 ProjectTimeline.associate(db)

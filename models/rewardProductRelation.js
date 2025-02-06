@@ -7,7 +7,6 @@ module.exports = class RewardProductRelation extends Sequelize.Model {
             // 수량
             stock: {
                type: Sequelize.INTEGER,
-               primaryKey: true,
             },
          },
          {
