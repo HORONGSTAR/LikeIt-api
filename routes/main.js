@@ -49,12 +49,65 @@ router.get('/list/:type', async (req, res) => {
             include: [
                {
                   model: Order,
-                  attributes: ['orderPrice'],
+                  attributes: [],
                   required: false,
                },
             ],
-            attributes: [Sequelize.fn('SUM', Sequelize.col('Orders.orderPrice')), 'totalOrderPrice'],
+            attributes: [
+               'id', // Project 모델에서 필요한 속성
+               [Sequelize.fn('SUM', Sequelize.col('Orders.orderPrice')), 'totalOrderPrice'], // orderPrice 합계 계산
+            ],
             group: ['Project.id'],
+         })
+         projects.push(tempProject)
+      }
+
+      // 신규 프로젝트
+      if (type == 'new' || type == 'all') {
+         const today = new Date()
+         const tempProject = await Project.findAll({
+            limit,
+            offset,
+            where: {
+               startDate: {
+                  [Sequelize.Op.lte]: today, // 오늘 이전의 데이터
+               },
+            },
+            order: [['startDate', 'DESC']],
+         })
+         projects.push(tempProject)
+      }
+
+      // 마감 임박
+      if (type == 'end' || type == 'all') {
+         const today = new Date()
+         const tempProject = await Project.findAll({
+            limit,
+            offset,
+            where: {
+               startDate: {
+                  [Sequelize.Op.lte]: today, // 오늘 이후의 데이터
+               },
+            },
+            order: [['endDate', 'ASC']],
+         })
+         projects.push(tempProject)
+      }
+
+      // 공개 예정
+      if (type == 'comming' || type == 'all') {
+         const today = new Date()
+
+         const tempProject = await Project.findAll({
+            limit,
+            offset,
+            where: {
+               startDate: {
+                  [Sequelize.Op.gte]: today, // 오늘 이후의 데이터
+               },
+               proposalStatus: 'COMPLETE',
+            },
+            order: [['startDate', 'ASC']],
          })
          projects.push(tempProject)
       }
