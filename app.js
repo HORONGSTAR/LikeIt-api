@@ -14,6 +14,7 @@ const passportConfig = require('./passport') // passport 폴더에 index.js
 
 const indexRouter = require('./routes')
 const mainRouter = require('./routes/main')
+const authRouter = require('./routes/auth')
 
 const app = express()
 passportConfig() // passport 실행
