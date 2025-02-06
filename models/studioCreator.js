@@ -4,11 +4,6 @@ module.exports = class StudioCreator extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
-            // 스튜디오유저 id
-            id: {
-               type: Sequelize.INTEGER,
-               primaryKey: true,
-            },
             // 대표여부
             role: {
                type: Sequelize.ENUM('LEADER', 'TEAMMATE'),
@@ -30,7 +25,7 @@ module.exports = class StudioCreator extends Sequelize.Model {
             paranoid: true,
             underscored: false,
             modelName: 'StudioCreator',
-            tableName: 'studioCreator',
+            tableName: 'studioCreators',
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',
          }

@@ -4,11 +4,6 @@ module.exports = class UserAccount extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
-            // 계정 id
-            id: {
-               type: Sequelize.INTEGER,
-               primaryKey: true,
-            },
             // 계정주소
             accountEmail: {
                type: Sequelize.STRING(500),
@@ -28,7 +23,7 @@ module.exports = class UserAccount extends Sequelize.Model {
             paranoid: true,
             underscored: false,
             modelName: 'UserAccount',
-            tableName: 'userAccount',
+            tableName: 'userAccounts',
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',
          }

@@ -2,8 +2,8 @@ const express = require('express')
 const router = express.Router()
 const fs = require('fs')
 
-const { BannerProject, Project, Reward, Order } = require('../models')
-const { Sequelize, Op, fn, col, literal } = require('sequelize')
+const { BannerProject, Project, Order } = require('../models')
+const { Sequelize } = require('sequelize')
 
 // uploads 폴더가 없을 경우 새로 생성
 try {
@@ -48,15 +48,13 @@ router.get('/list/:type', async (req, res) => {
             offset,
             include: [
                {
-                  model: Reward,
-                  include: [
-                     {
-                        model: Order,
-                        attributes: ['orderPrice'],
-                     },
-                  ],
+                  model: Order,
+                  attributes: ['orderPrice'],
+                  required: false,
                },
             ],
+            attributes: [Sequelize.fn('SUM', Sequelize.col('Orders.orderPrice')), 'totalOrderPrice'],
+            group: ['Project.id'],
          })
          projects.push(tempProject)
       }

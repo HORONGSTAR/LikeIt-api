@@ -4,11 +4,6 @@ module.exports = class Studio extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
-            // 스튜디오 id
-            id: {
-               type: Sequelize.INTEGER,
-               primaryKey: true,
-            },
             // 스튜디오 이름
             name: {
                type: Sequelize.STRING(200),
@@ -33,7 +28,7 @@ module.exports = class Studio extends Sequelize.Model {
             paranoid: true,
             underscored: false,
             modelName: 'Studio',
-            tableName: 'studio',
+            tableName: 'studios',
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',
          }

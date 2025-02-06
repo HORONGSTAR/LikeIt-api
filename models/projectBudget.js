@@ -4,11 +4,6 @@ module.exports = class ProjectBudget extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
-            // 예산 id
-            id: {
-               type: Sequelize.INTEGER,
-               primaryKey: true,
-            },
             // 내용
             contents: {
                type: Sequelize.STRING(200),
@@ -26,7 +21,7 @@ module.exports = class ProjectBudget extends Sequelize.Model {
             paranoid: false,
             underscored: false,
             modelName: 'ProjectBudget',
-            tableName: 'projectBudget',
+            tableName: 'projectBudgets',
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',
          }

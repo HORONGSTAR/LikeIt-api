@@ -4,11 +4,6 @@ module.exports = class ProjectTimelineComment extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
-            // 댓글 id
-            id: {
-               type: Sequelize.INTEGER,
-               primaryKey: true,
-            },
             // 내용
             comment: {
                type: Sequelize.STRING(500),
@@ -22,7 +17,7 @@ module.exports = class ProjectTimelineComment extends Sequelize.Model {
             paranoid: true,
             underscored: false,
             modelName: 'ProjectTimelineComment',
-            tableName: 'projectTimelineComment',
+            tableName: 'projectTimelineComments',
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',
          }

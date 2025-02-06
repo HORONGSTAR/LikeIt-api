@@ -5,11 +5,6 @@ module.exports = class BannerProject extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
-            // 배너 id
-            id: {
-               type: Sequelize.INTEGER,
-               primaryKey: true,
-            },
             // 배너 이미지 URL
             imgUrl: {
                type: Sequelize.STRING(100),
@@ -23,7 +18,7 @@ module.exports = class BannerProject extends Sequelize.Model {
             paranoid: true,
             underscored: false,
             modelName: 'BannerProject',
-            tableName: 'bannerProject',
+            tableName: 'bannerProjects',
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',
          }
