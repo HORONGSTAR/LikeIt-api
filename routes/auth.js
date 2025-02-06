@@ -27,7 +27,7 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
     }
 
     //이름 중복 확인
-    const exNicknameUser = await User.findOne({ where: { nickname } })
+    const exNicknameUser = await User.findOne({ where: { name: nickname } })
     if (exNicknameUser) {
       return res.status(409).json({
         success: false,
