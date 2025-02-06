@@ -4,11 +4,6 @@ module.exports = class Category extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
-            // 카테고리 id
-            id: {
-               type: Sequelize.INTEGER,
-               primaryKey: true,
-            },
             // 카테고리 이름
             categoryName: {
                type: Sequelize.STRING(100),
@@ -21,7 +16,7 @@ module.exports = class Category extends Sequelize.Model {
             paranoid: false,
             underscored: false,
             modelName: 'Category',
-            tableName: 'category',
+            tableName: 'categories',
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',
          }

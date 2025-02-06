@@ -4,11 +4,6 @@ module.exports = class Project extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
-            // 프로젝트 id
-            id: {
-               type: Sequelize.INTEGER,
-               primaryKey: true,
-            },
             // 프로젝트명
             title: {
                type: Sequelize.STRING(100),
@@ -66,7 +61,7 @@ module.exports = class Project extends Sequelize.Model {
             paranoid: true,
             underscored: false,
             modelName: 'Project',
-            tableName: 'project',
+            tableName: 'projects',
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',
          }

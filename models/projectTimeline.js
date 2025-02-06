@@ -4,11 +4,6 @@ module.exports = class ProjectTimeline extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
-            // 타임라인 id
-            id: {
-               type: Sequelize.INTEGER,
-               primaryKey: true,
-            },
             // 제목
             title: {
                type: Sequelize.STRING(200),
@@ -33,7 +28,7 @@ module.exports = class ProjectTimeline extends Sequelize.Model {
             paranoid: true,
             underscored: false,
             modelName: 'ProjectTimeline',
-            tableName: 'projectTimeline',
+            tableName: 'projectTimelines',
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',
          }

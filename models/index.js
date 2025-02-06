@@ -6,6 +6,7 @@ const Address = require('./address')
 const BannerProject = require('./bannerProject')
 const Category = require('./category')
 const Creator = require('./creator')
+const CreatorBudget = require('./creatorBudget')
 const CreatorProfit = require('./creatorProfit')
 const Message = require('./message')
 const Order = require('./order')
@@ -38,6 +39,7 @@ db.Address = Address
 db.BannerProject = BannerProject
 db.Category = Category
 db.Creator = Creator
+db.CreatorBudget = CreatorBudget
 db.CreatorProfit = CreatorProfit
 db.Message = Message
 db.Order = Order
@@ -66,6 +68,7 @@ Address.init(sequelize)
 BannerProject.init(sequelize)
 Category.init(sequelize)
 Creator.init(sequelize)
+CreatorBudget.init(sequelize)
 CreatorProfit.init(sequelize)
 Message.init(sequelize)
 Order.init(sequelize)
@@ -94,6 +97,7 @@ Address.associate(db)
 BannerProject.associate(db)
 Category.associate(db)
 Creator.associate(db)
+CreatorBudget.associate(db)
 CreatorProfit.associate(db)
 Message.associate(db)
 Order.associate(db)

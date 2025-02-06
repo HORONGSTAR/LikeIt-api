@@ -4,11 +4,6 @@ module.exports = class Message extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
-            // 알림 id
-            id: {
-               type: Sequelize.INTEGER,
-               primaryKey: true,
-            },
             // 알림내용
             message: {
                type: Sequelize.STRING(500),
@@ -22,7 +17,7 @@ module.exports = class Message extends Sequelize.Model {
             paranoid: true,
             underscored: false,
             modelName: 'Message',
-            tableName: 'message',
+            tableName: 'messages',
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',
          }
