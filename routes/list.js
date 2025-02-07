@@ -23,8 +23,24 @@ router.get('/:type', async (req, res) => {
       const { type } = req.params // hot, new, end, comming, all
       console.log(type)
 
-      const count = await Project.count()
+      let count = 0
 
+      if (type === 'comming') {
+         count = await Project.count({
+            where: {
+               startDate: {
+                  [Sequelize.Op.gte]: today, // 오늘 이후의 데이터
+               },
+               proposalStatus: 'COMPLETE',
+            },
+         })
+      } else {
+         count = await Project.count({
+            where: {
+               projectStatus: 'ON_FUNDING',
+            },
+         })
+      }
       const projects = {}
 
       // 인기 프로젝트
@@ -157,12 +173,7 @@ router.get('/:type', async (req, res) => {
          success: true,
          message: '프로젝트 목록 조회 성공',
          projects,
-         pagination: {
-            totalProjects: count,
-            totalPages: Math.ceil(count / limit),
-            currentPage: page,
-            limit,
-         },
+         count,
       })
    } catch (error) {
       console.error(error)
