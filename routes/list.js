@@ -66,6 +66,7 @@ router.get('/:type', async (req, res) => {
                include: [[Sequelize.fn('SUM', Sequelize.col('Orders.orderPrice')), 'totalOrderPrice']], // orderPrice 합계 계산
             },
             group: ['Project.id'],
+            order: [['totalOrderPrice', 'DESC']],
          })
          projects.hot = tempProject
       }
