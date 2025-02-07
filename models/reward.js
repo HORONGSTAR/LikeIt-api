@@ -4,11 +4,6 @@ module.exports = class Reward extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
-            // 리워드 id
-            id: {
-               type: Sequelize.INTEGER,
-               primaryKey: true,
-            },
             // 리워드금액
             price: {
                type: Sequelize.INTEGER,
@@ -41,7 +36,7 @@ module.exports = class Reward extends Sequelize.Model {
             paranoid: false,
             underscored: false,
             modelName: 'Reward',
-            tableName: 'reward',
+            tableName: 'rewards',
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',
          }

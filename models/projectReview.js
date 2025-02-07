@@ -4,11 +4,6 @@ module.exports = class ProjectReview extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
-            // 리뷰 id
-            id: {
-               type: Sequelize.INTEGER,
-               primaryKey: true,
-            },
             // 별점
             star: {
                type: Sequelize.FLOAT,
@@ -32,7 +27,7 @@ module.exports = class ProjectReview extends Sequelize.Model {
             paranoid: true,
             underscored: false,
             modelName: 'ProjectReview',
-            tableName: 'projectReview',
+            tableName: 'projectReviews',
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',
          }

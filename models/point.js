@@ -4,11 +4,6 @@ module.exports = class Point extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
-            // 포인트 id
-            id: {
-               type: Sequelize.INTEGER,
-               primaryKey: true,
-            },
             // 포인트변동
             changePoint: {
                type: Sequelize.INTEGER,
@@ -26,7 +21,7 @@ module.exports = class Point extends Sequelize.Model {
             timestamps: true,
             underscored: false,
             modelName: 'Point',
-            tableName: 'point',
+            tableName: 'points',
             paranoid: false,
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',

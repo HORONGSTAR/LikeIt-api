@@ -4,11 +4,6 @@ module.exports = class creatorProfit extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
-            // 수익금 id
-            id: {
-               type: Sequelize.INTEGER,
-               primaryKey: true,
-            },
             // 수익금변동
             changeProfit: {
                type: Sequelize.INTEGER,
@@ -26,7 +21,7 @@ module.exports = class creatorProfit extends Sequelize.Model {
             timestamps: true,
             underscored: false,
             modelName: 'Point',
-            tableName: 'point',
+            tableName: 'points',
             paranoid: false,
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',

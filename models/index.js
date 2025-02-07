@@ -6,13 +6,13 @@ const Address = require('./address')
 const BannerProject = require('./bannerProject')
 const Category = require('./category')
 const Creator = require('./creator')
+const CreatorBudget = require('./creatorBudget')
 const CreatorProfit = require('./creatorProfit')
 const Message = require('./message')
 const Order = require('./order')
 const Point = require('./point')
 const Project = require('./project')
 const ProjectBudget = require('./projectBudget')
-const ProjectImg = require('./projectImg')
 const ProjectReview = require('./projectReview')
 const ProjectReviewImg = require('./projectReviewImg')
 const ProjectTimeline = require('./projectTimeline')
@@ -38,13 +38,13 @@ db.Address = Address
 db.BannerProject = BannerProject
 db.Category = Category
 db.Creator = Creator
+db.CreatorBudget = CreatorBudget
 db.CreatorProfit = CreatorProfit
 db.Message = Message
 db.Order = Order
 db.Point = Point
 db.Project = Project
 db.ProjectBudget = ProjectBudget
-db.ProjectImg = ProjectImg
 db.ProjectReview = ProjectReview
 db.ProjectReviewImg = ProjectReviewImg
 db.ProjectTimeline = ProjectTimeline
@@ -66,13 +66,13 @@ Address.init(sequelize)
 BannerProject.init(sequelize)
 Category.init(sequelize)
 Creator.init(sequelize)
+CreatorBudget.init(sequelize)
 CreatorProfit.init(sequelize)
 Message.init(sequelize)
 Order.init(sequelize)
 Point.init(sequelize)
 Project.init(sequelize)
 ProjectBudget.init(sequelize)
-ProjectImg.init(sequelize)
 ProjectReview.init(sequelize)
 ProjectReviewImg.init(sequelize)
 ProjectTimeline.init(sequelize)
@@ -94,13 +94,13 @@ Address.associate(db)
 BannerProject.associate(db)
 Category.associate(db)
 Creator.associate(db)
+CreatorBudget.associate(db)
 CreatorProfit.associate(db)
 Message.associate(db)
 Order.associate(db)
 Point.associate(db)
 Project.associate(db)
 ProjectBudget.associate(db)
-ProjectImg.associate(db)
 ProjectReview.associate(db)
 ProjectReviewImg.associate(db)
 ProjectTimeline.associate(db)

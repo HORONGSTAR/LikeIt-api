@@ -4,11 +4,6 @@ module.exports = class Address extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
-            // 주소 id
-            id: {
-               type: Sequelize.INTEGER,
-               primaryKey: true,
-            },
             // 주소지
             address: {
                type: Sequelize.STRING(500),
@@ -25,7 +20,7 @@ module.exports = class Address extends Sequelize.Model {
             timestamps: false,
             underscored: false,
             modelName: 'Address',
-            tableName: 'address',
+            tableName: 'addresses',
             paranoid: false,
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',

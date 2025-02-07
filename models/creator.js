@@ -4,11 +4,6 @@ module.exports = class Creator extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
-            // 창작자 id
-            id: {
-               type: Sequelize.INTEGER,
-               primaryKey: true,
-            },
             // 수익금
             profit: {
                type: Sequelize.INTEGER,
@@ -21,7 +16,7 @@ module.exports = class Creator extends Sequelize.Model {
             paranoid: false,
             underscored: false,
             modelName: 'Creator',
-            tableName: 'creator',
+            tableName: 'creators',
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',
          }

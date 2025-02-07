@@ -4,11 +4,6 @@ module.exports = class Project extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
-            // 프로젝트 id
-            id: {
-               type: Sequelize.INTEGER,
-               primaryKey: true,
-            },
             // 프로젝트명
             title: {
                type: Sequelize.STRING(100),
@@ -32,6 +27,11 @@ module.exports = class Project extends Sequelize.Model {
             // 일정표
             schedule: {
                type: Sequelize.TEXT,
+               allowNull: false,
+            },
+            // 이미지
+            imgUrl: {
+               type: Sequelize.STRING(100),
                allowNull: false,
             },
             // 관리자메모(미승인시 사유)
@@ -66,7 +66,7 @@ module.exports = class Project extends Sequelize.Model {
             paranoid: true,
             underscored: false,
             modelName: 'Project',
-            tableName: 'project',
+            tableName: 'projects',
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',
          }
@@ -90,11 +90,6 @@ module.exports = class Project extends Sequelize.Model {
          onDelete: 'CASCADE',
       })
       Project.hasMany(db.ProjectTimeline, {
-         foreignKey: 'projectId',
-         sourceKey: 'id',
-         onDelete: 'CASCADE',
-      })
-      Project.hasMany(db.ProjectImg, {
          foreignKey: 'projectId',
          sourceKey: 'id',
          onDelete: 'CASCADE',

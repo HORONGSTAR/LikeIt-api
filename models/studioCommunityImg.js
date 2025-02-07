@@ -4,11 +4,6 @@ module.exports = class StudioCommunityImg extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
-            // 이미지 id
-            id: {
-               type: Sequelize.INTEGER,
-               primaryKey: true,
-            },
             // 원본 이미지 이름
             oriImgName: {
                type: Sequelize.STRING(500),
@@ -27,7 +22,7 @@ module.exports = class StudioCommunityImg extends Sequelize.Model {
             paranoid: false,
             underscored: false,
             modelName: 'StudioCommunityImg',
-            tableName: 'studioCommunityImg',
+            tableName: 'studioCommunityImgs',
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',
          }

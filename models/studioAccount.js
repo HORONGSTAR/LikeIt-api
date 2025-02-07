@@ -4,11 +4,6 @@ module.exports = class StudioAccount extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
-            // 연동계정 id
-            id: {
-               type: Sequelize.INTEGER,
-               primaryKey: true,
-            },
             // 계정종류
             type: {
                type: Sequelize.ENUM('INSTAGRAM', 'YOUTUBE', 'X'),
@@ -26,7 +21,7 @@ module.exports = class StudioAccount extends Sequelize.Model {
             paranoid: false,
             underscored: false,
             modelName: 'StudioAccount',
-            tableName: 'studioAccount',
+            tableName: 'studioAccounts',
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',
          }
