@@ -13,18 +13,30 @@ try {
    fs.mkdirSync('uploads')
 }
 
-// 프로젝트 정렬 호출 (페이징+검색(구현중))
+// 프로젝트 정렬 호출
 router.get('/:type', async (req, res) => {
    try {
       const page = parseInt(req.query.page, 10) || 1
       const limit = parseInt(req.query.limit, 10) || 4
       const offset = (page - 1) * limit
-
+      const searchTerm = req.query.searchTerm || '' // 검색 키워드
+      const categoryId = req.query.categoryId || '' // 카테고리 키워드
       const { type } = req.params // hot, new, end, comming, all
-      console.log(type)
+      const today = new Date()
+      // 검색 조건절
+      const whereClause = {
+         ...(searchTerm && {
+            ['title']: {
+               [Sequelize.Op.like]: `%${searchTerm}%`,
+            },
+         }),
+         ...(categoryId && {
+            ['categoryId']: categoryId,
+         }),
+      }
 
+      // 갯수 카운트
       let count = 0
-
       if (type === 'comming') {
          count = await Project.count({
             where: {
@@ -32,11 +44,13 @@ router.get('/:type', async (req, res) => {
                   [Sequelize.Op.gte]: today, // 오늘 이후의 데이터
                },
                proposalStatus: 'COMPLETE',
+               projectStatus: 'WAITING_FUNDING',
             },
          })
       } else {
          count = await Project.count({
             where: {
+               ...whereClause,
                projectStatus: 'ON_FUNDING',
             },
          })
@@ -73,7 +87,6 @@ router.get('/:type', async (req, res) => {
 
       // 신규 프로젝트
       if (type == 'new' || type == 'all') {
-         const today = new Date()
          const tempProject = await Project.findAll({
             limit,
             offset,
@@ -89,9 +102,7 @@ router.get('/:type', async (req, res) => {
                },
             ],
             where: {
-               startDate: {
-                  [Sequelize.Op.lte]: today, // 오늘 이전의 데이터
-               },
+               ...whereClause,
                projectStatus: 'ON_FUNDING',
             },
             attributes: {
@@ -105,7 +116,6 @@ router.get('/:type', async (req, res) => {
 
       // 마감 임박
       if (type == 'end' || type == 'all') {
-         const today = new Date()
          const tempProject = await Project.findAll({
             limit,
             offset,
@@ -121,9 +131,6 @@ router.get('/:type', async (req, res) => {
                },
             ],
             where: {
-               startDate: {
-                  [Sequelize.Op.lte]: today, // 오늘 이후의 데이터
-               },
                projectStatus: 'ON_FUNDING',
             },
             attributes: {
@@ -137,8 +144,6 @@ router.get('/:type', async (req, res) => {
 
       // 공개 예정
       if (type == 'comming' || type == 'all') {
-         const today = new Date()
-
          const tempProject = await Project.findAll({
             limit,
             offset,
@@ -164,6 +169,7 @@ router.get('/:type', async (req, res) => {
                   [Sequelize.Op.gte]: today, // 오늘 이후의 데이터
                },
                proposalStatus: 'COMPLETE',
+               projectStatus: 'WAITING_FUNDING',
             },
             order: [['startDate', 'ASC']],
          })

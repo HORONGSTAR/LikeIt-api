@@ -4,6 +4,10 @@ const router = express.Router()
 const { BannerProject } = require('../models')
 const { Sequelize, Model } = require('sequelize')
 
+router.get('/', async (req, res) => {
+   res.send('서버가 정상적으로 실행 중입니다.')
+})
+
 // 배너 프로젝트 호출
 router.get('/banner', async (req, res) => {
    try {
