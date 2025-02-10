@@ -15,6 +15,7 @@ const passportConfig = require('./passport') // passport 폴더에 index.js
 const indexRouter = require('./routes/')
 const listRouter = require('./routes/list')
 const authRouter = require('./routes/auth')
+const studioRouter = require('./routes/studio')
 
 const app = express()
 passportConfig() // passport 실행
@@ -63,6 +64,7 @@ app.use(passport.session()) // Passport와 생성해둔 세션 연결
 app.use('/', indexRouter)
 app.use('/list', listRouter)
 app.use('/auth', authRouter)
+app.use('/studio', studioRouter)
 
 // 잘못된 라우터 경로 처리
 app.use((req, res, next) => {
