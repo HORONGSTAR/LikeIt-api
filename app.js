@@ -1,5 +1,4 @@
 const express = require('express')
-
 const path = require('path') // 경로 처리 유틸리티
 const cookieParser = require('cookie-parser') // 쿠키 처리 미들웨어
 const morgan = require('morgan') // HTTP 요청 로깅 미들웨어
@@ -11,6 +10,7 @@ const cors = require('cors') // cors 미들웨어 -> api 서버는 반드시 설
 // 라우터 및 기타 모듈 불러오기
 const { sequelize } = require('./models')
 const passportConfig = require('./passport') // passport 폴더에 index.js
+const projectRouter = require('./routes/project') // 프로젝트 라우트 추가
 
 const app = express()
 passportConfig() // passport 실행
@@ -56,6 +56,7 @@ app.use(passport.initialize()) // 초기화
 app.use(passport.session()) // Passport와 생성해둔 세션 연결
 
 // 라우터 등록
+app.use('/api', projectRouter)
 
 // 잘못된 라우터 경로 처리
 app.use((req, res, next) => {
