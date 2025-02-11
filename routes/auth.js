@@ -101,7 +101,7 @@ router.post('/login', isNotLoggedIn, async (req, res, next) => {
         },
       })
     })
-  })
+  })(req, res, next)
 })
 
 //로그아웃 localhost:8000/auth/logout

@@ -15,6 +15,10 @@ module.exports = class ProjectTimeline extends Sequelize.Model {
                type: Sequelize.TEXT,
                allowNull: false,
             },
+            // 이미지 경로
+            imgUrl: {
+               type: Sequelize.STRING(200),
+            },
             // 추천수
             recommend: {
                type: Sequelize.INTEGER,
@@ -39,11 +43,6 @@ module.exports = class ProjectTimeline extends Sequelize.Model {
       ProjectTimeline.belongsTo(db.Project, {
          foreignKey: 'projectId',
          targetKey: 'id',
-         onDelete: 'CASCADE',
-      })
-      ProjectTimeline.hasMany(db.ProjectTimelineImg, {
-         foreignKey: 'timelineId',
-         sourceKey: 'id',
          onDelete: 'CASCADE',
       })
       ProjectTimeline.hasMany(db.ProjectTimelineComment, {
