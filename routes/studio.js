@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
-const fs = require('fs')
-const { Project, Studio, User } = require('../models')
+const { Project, Studio, User, Creator, StudioCreator, StudioAccount, Order } = require('../models')
+const { Sequelize } = require('sequelize')
 
 router.get('/', async (req, res) => {
    try {
@@ -9,16 +9,43 @@ router.get('/', async (req, res) => {
          where: { id: 1 },
          include: [
             {
-               model: Project,
-               attributes: ['id', 'title', 'intro', 'imgUrl', 'projectStatus'],
-               order: [['startDate', 'DESC']],
+               model: StudioCreator,
+               include: [
+                  {
+                     model: Creator,
+                     include: [{ model: User }],
+                  },
+               ],
+            },
+            {
+               model: StudioAccount,
             },
          ],
       })
+
+      const projects = await Project.findAll({
+         subQuery: false,
+         where: { studioId: 1 },
+         include: [
+            {
+               model: Order,
+               attributes: [],
+               required: false,
+            },
+         ],
+
+         attributes: {
+            include: [[Sequelize.fn('SUM', Sequelize.col('Orders.orderPrice')), 'totalOrderPrice']],
+         },
+         group: ['Project.id'],
+         order: [['startDate', 'DESC']],
+      })
+
       res.json({
          success: true,
          message: '스튜디오 조회 성공',
          studio,
+         projects,
       })
    } catch (error) {
       console.error(error)
