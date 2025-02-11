@@ -14,6 +14,10 @@ module.exports = class StudioCommunity extends Sequelize.Model {
                type: Sequelize.TEXT,
                allowNull: false,
             },
+            // 이미지 경로
+            imgUrl: {
+               type: Sequelize.STRING(200),
+            },
             // 추천수
             recommend: {
                type: Sequelize.INTEGER,
@@ -40,11 +44,6 @@ module.exports = class StudioCommunity extends Sequelize.Model {
    }
 
    static associate(db) {
-      StudioCommunity.hasMany(db.StudioCommunityImg, {
-         foreignKey: 'communityId',
-         sourceKey: 'id',
-         onDelete: 'CASCADE',
-      })
       StudioCommunity.hasMany(db.StudioCommunityComment, {
          foreignKey: 'communityId',
          sourceKey: 'id',

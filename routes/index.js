@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const { BannerProject } = require('../models')
+const { BannerProject, User } = require('../models')
 const { Sequelize, Model } = require('sequelize')
 
 router.get('/', async (req, res) => {
@@ -20,6 +20,22 @@ router.get('/banner', async (req, res) => {
    } catch (error) {
       console.error(error)
       res.status(500).json({ success: false, message: '배너 프로젝트를 호출하는데 문제가 발생했습니다.' })
+   }
+})
+
+// 후원자 통계 데이터 호출
+router.get('/rank', async (req, res) => {
+   try {
+      const rankData = await User.findAll({})
+
+      res.json({
+         success: true,
+         banners,
+         message: '배너 프로젝트 호출 성공',
+      })
+   } catch (error) {
+      console.error(error)
+      res.status(500).json({ success: false, message: '후원자 통계 데이터를 호출하는데 문제가 발생했습니다.' })
    }
 })
 
