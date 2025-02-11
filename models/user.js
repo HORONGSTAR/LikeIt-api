@@ -30,6 +30,7 @@ module.exports = class User extends Sequelize.Model {
             imgUrl: {
                type: Sequelize.STRING(100),
                allowNull: true,
+               defaultValue: '/default_profile.png',
             },
             // 포인트
             point: {
