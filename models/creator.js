@@ -40,5 +40,10 @@ module.exports = class Creator extends Sequelize.Model {
          otherKey: 'categoryId',
          onDelete: 'CASCADE',
       })
+      Creator.belongsTo(db.User, {
+         foreignKey: 'userId',
+         targetKey: 'id',
+         onDelete: 'CASCADE',
+      })
    }
 }
