@@ -11,11 +11,14 @@ const cors = require('cors') // cors 미들웨어 -> api 서버는 반드시 설
 // 라우터 및 기타 모듈 불러오기
 const { sequelize } = require('./models')
 const passportConfig = require('./passport') // passport 폴더에 index.js
-
 const indexRouter = require('./routes/')
 const listRouter = require('./routes/list')
 const authRouter = require('./routes/auth')
 const rankRouter = require('./routes/rank')
+const communityRouter = require('./routes/community')
+const commentRouter = require('./routes/comment')
+const studioRouter = require('./routes/studio')
+
 
 const app = express()
 passportConfig() // passport 실행
@@ -65,6 +68,9 @@ app.use('/', indexRouter)
 app.use('/list', listRouter)
 app.use('/auth', authRouter)
 app.use('/rank', rankRouter)
+app.use('/community', communityRouter)
+app.use('/comment', commentRouter)
+app.use('/studio', studioRouter)
 
 // 잘못된 라우터 경로 처리
 app.use((req, res, next) => {
