@@ -1,16 +1,28 @@
 const express = require('express')
-const { StudioCommunity, User } = require('../models')
+const { StudioCommunity, User, StudioCommunityComment } = require('../models')
 
 const router = express.Router()
 
 // 커뮤니티 목록 조회
 router.get('/list', async (req, res) => {
    try {
-      const { page, limit } = req.query
+      const page = parseInt(req.query.page, 10) || 1
+      const limit = parseInt(req.query.limit, 10) || 4
+      const offset = (page - 1) * limit
       const communities = await StudioCommunity.findAll({
-         limit: parseInt(limit),
-         offset: (parseInt(page) - 1) * parseInt(limit),
+         limit,
+         offset,
          order: [['createdAt', 'DESC']],
+         include: [
+            {
+               model: User,
+               attributes: ['name', 'imgUrl'],
+            },
+            {
+               model: StudioCommunityComment,
+               attributes: ['id'],
+            },
+         ],
       })
 
       res.json({ success: true, communities })
@@ -27,8 +39,7 @@ router.get('/:id', async (req, res) => {
          where: { id: req.params.id },
          include: [
             {
-               model: User,
-               attributes: ['name'],
+               model: StudioCommunityComment,
             },
          ],
       })

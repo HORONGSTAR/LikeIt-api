@@ -40,10 +40,10 @@ router.post('/', isLoggedIn, async (req, res) => {
 })
 
 // 특정 게시물의 댓글 가져오기 (페이징 포함)
-router.get('/', async (req, res) => {
+router.get('/:id', async (req, res) => {
    try {
-      console.log('댓글 조회 요청 데이터:', req.query) // 로그 추가
-      const { communityId, page = 1, limit = 10 } = req.query
+      const communityId = req.params.id
+      const { page = 1, limit = 10 } = req.query
 
       if (!communityId) {
          return res.status(400).json({ success: false, message: '게시물 ID가 필요합니다.' })
