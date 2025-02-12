@@ -188,4 +188,56 @@ router.get('/:type', async (req, res) => {
    }
 })
 
+router.get('/follow/:id', async (req, res) => {
+   try {
+      const page = parseInt(req.query.page, 10) || 1
+      const limit = parseInt(req.query.limit, 10) || 8
+      const offset = (page - 1) * limit
+      const { id } = req.params
+
+      let count = await Studio.count({
+         include: {
+            model: User,
+            where: { id },
+            through: { attributes: [] },
+         },
+      })
+
+      const followUser = await User.findOne({
+         subQuery: false,
+         limit,
+         offset,
+         where: { id },
+         attributes: [],
+         include: [
+            {
+               model: Studio,
+               through: { attributes: [] },
+               attributes: {
+                  include: [[Sequelize.fn('COUNT', Sequelize.col('Studios->StudioFavorite.userId')), 'userCount']],
+               },
+               include: [
+                  {
+                     model: User,
+                     attributes: [],
+                     through: { attributes: [] },
+                     required: false,
+                  },
+               ],
+            },
+         ],
+         group: ['Studios.id'],
+      })
+      res.json({
+         followUser,
+         count,
+         success: true,
+         message: '팔로우 목록 조회 성공',
+      })
+   } catch (error) {
+      console.error(error)
+      res.status(500).json({ success: false, message: '구독중인 스튜디오를 호출하는 중에 오류가 발생했습니다.' })
+   }
+})
+
 module.exports = router

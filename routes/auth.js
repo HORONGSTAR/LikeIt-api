@@ -4,12 +4,20 @@ const passport = require('passport')
 const bcrypt = require('bcrypt')
 const { isLoggedIn, isNotLoggedIn } = require('./middlewares')
 const User = require('../models/user')
+const UserAccount = require('../models/userAccount')
+const nodemailer = require('nodemailer')
 
 //일반회원가입 localhost:8000/auth/join
 router.post('/join', isNotLoggedIn, async (req, res, next) => {
    const { email, phone, nickname, password } = req.body
    //이메일 중복 확인
    try {
+      if (!email || !phone || !nickname || !password) {
+         return res.status(404).json({
+            success: false,
+            message: '모든 입력란을 입력해주세요.',
+         })
+      }
       const exEmailUser = await User.findOne({ where: { email } })
       if (exEmailUser) {
          return res.status(409).json({
@@ -61,7 +69,7 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
    }
 })
 
-//로그인 localhost:8000/auth/login
+//일반로그인 localhost:8000/auth/login
 router.post('/login', isNotLoggedIn, async (req, res, next) => {
    passport.authenticate('local', (authError, user, info) => {
       if (authError) {
@@ -98,6 +106,7 @@ router.post('/login', isNotLoggedIn, async (req, res, next) => {
             user: {
                id: user.id,
                name: user.name,
+               role: user.role,
             },
          })
       })
@@ -151,6 +160,8 @@ router.get('/google/callback', isNotLoggedIn, (req, res, next) => {
    )(req, res, next)
 })
 
+//구글 어카운트가 없을경우의 user랑 account 모두 생성
+//전화번호를 확인하고 commonsignup만 돼있는 회원인지 아니면 googlelogin으로도 되어있는 회원인지에 따라서 코드가 달라져야 함.
 router.post('/googlejoin', isNotLoggedIn, async (req, res, next) => {
    const { phone } = req.body
    try {
@@ -166,14 +177,27 @@ router.post('/googlejoin', isNotLoggedIn, async (req, res, next) => {
          })
       }
       //동일한 전화번호로 가입한 사람이 없다면 newUser, newUserAccount 생성
-      console.log(req.session)
 
-      const newUserAccount = await User.create({
+      // console.log(req.session)
+      // console.log('어카운트이메일:', req.session.tempThings.tempUserAccount.accountEmail)
+
+      const newUserAccount = await UserAccount.create({
          accountEmail: req.session.tempThings.tempUserAccount.accountEmail,
          profileId: req.session.tempThings.tempUserAccount.profileId,
          accountType: req.session.tempThings.tempUserAccount.accountType,
       })
-      const newUser = await User.create({})
+      const newUser = await User.create({
+         email: req.session.tempThings.tempUser.email,
+         name: req.session.tempThings.tempUser.name,
+         phone: phone,
+         role: 'USER',
+      })
+
+      res.status(201).json({
+         success: true,
+         message: '사용자(구글연동)가 성공적으로 등록되었습니다.',
+         newUser,
+      })
    } catch (error) {
       console.error(error)
       res.status(500).json({
@@ -215,12 +239,33 @@ router.get('/status', async (req, res, next) => {
             id: req.user.id,
             name: req.user.name,
             email: req.user.email,
+            role: req.user.role,
          },
       })
    } else {
       res.json({
          isAuthenticated: false,
       })
+   }
+})
+
+//이메일 발송 localhost:8000/auth/status
+router.post('/sendpassword', async (req, res, next) => {
+   const { email_service, user, pass } = process.env
+
+   const transporter = nodemailer.createTransport({
+      service: email_service,
+      auth: {
+         user: user,
+         pass: pass,
+      },
+   })
+
+   const mailOptions = {
+      from: user,
+      to: '@',
+      subject: 'Nodemailer Test',
+      text: '노드 패키지 nodemailer를 이용해 보낸 이메일임',
    }
 })
 
