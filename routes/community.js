@@ -36,8 +36,7 @@ router.get('/:id', async (req, res) => {
       if (!community) {
          return res.status(404).json({ success: false, message: '게시물을 찾을 수 없습니다.' })
       }
-
-      res.json({ success: true, community, message: '게시물을 불러왔습니다.' })
+      res.json({ success: true, community })
    } catch (error) {
       console.error(error)
       res.status(500).json({ success: false, message: '게시물을 불러오는 중 오류가 발생했습니다.', error })
