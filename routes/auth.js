@@ -98,6 +98,7 @@ router.post('/login', isNotLoggedIn, async (req, res, next) => {
             user: {
                id: user.id,
                name: user.name,
+               role: user.role,
             },
          })
       })
@@ -215,6 +216,7 @@ router.get('/status', async (req, res, next) => {
             id: req.user.id,
             name: req.user.name,
             email: req.user.email,
+            role: req.user.role,
          },
       })
    } else {
