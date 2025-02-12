@@ -2,6 +2,7 @@ const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
 const bcrypt = require('bcrypt')
 const User = require('../models/user')
+const UserAccount = require('../models/userAccount')
 
 // 로그인 시 사용자 정보를 DB에서 조회하고 사용자 존재 여부와 비밀번호를 비교 -> passport에 결과를 전달
 module.exports = () => {
@@ -18,7 +19,6 @@ module.exports = () => {
                // 이메일로 사용자 조회
                // select * from users where email = ?
                const exUser = await User.findOne({ where: { email } })
-
                if (exUser) {
                   //이메일에 해당하는 사용자가 있는 경우 비밀번호 비교
                   const result = await bcrypt.compare(password, exUser.password)
