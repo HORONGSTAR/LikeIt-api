@@ -46,6 +46,8 @@ router.get('/:userId', async (req, res) => {
          order: [['startDate', 'DESC']],
       })
 
+      console.log(projects)
+
       res.json({
          success: true,
          message: '스튜디오 조회 성공',
