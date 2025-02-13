@@ -6,35 +6,43 @@ const { Sequelize } = require('sequelize')
 // 스튜디오 조회
 router.get('/', async (req, res) => {
    try {
+      const creatorId = (
+         await Creator.findOne({
+            where: { userId: req.user.id },
+            attributes: ['id'],
+         })
+      )?.id
+
+      if (!creatorId) {
+         return res.status(400).json({ success: false, message: '창작자 정보를 찾을 수 없습니다.' })
+      }
+
+      const studioId = (
+         await StudioCreator.findOne({
+            where: { creatorId },
+            attributes: ['studioId'],
+         })
+      )?.studioId
+
+      if (!studioId) {
+         return res.status(400).json({ success: false, message: '스튜디오를 찾을 수 없습니다.' })
+      }
+
       const studio = await Studio.findOne({
-         where: { id: 1 },
+         where: { id: studioId },
          include: [
             {
                model: StudioCreator,
-               include: [
-                  {
-                     model: Creator,
-                     include: [{ model: User }],
-                  },
-               ],
+               include: [{ model: Creator, include: [User] }],
             },
-            {
-               model: StudioAccount,
-            },
+            { model: StudioAccount },
          ],
       })
 
       const projects = await Project.findAll({
          subQuery: false,
-         where: { studioId: 1 },
-         include: [
-            {
-               model: Order,
-               attributes: [],
-               required: false,
-            },
-         ],
-
+         where: { studioId },
+         include: [{ model: Order, attributes: [], required: false }],
          attributes: {
             include: [[Sequelize.fn('SUM', Sequelize.col('Orders.orderPrice')), 'totalOrderPrice']],
          },
@@ -42,12 +50,7 @@ router.get('/', async (req, res) => {
          order: [['startDate', 'DESC']],
       })
 
-      res.json({
-         success: true,
-         message: '스튜디오 조회 성공',
-         studio,
-         projects,
-      })
+      res.json({ success: true, message: '스튜디오 조회 성공', studio, projects })
    } catch (error) {
       console.error(error)
       res.status(500).json({ success: false, message: '스튜디오를 호출하는 중에 오류가 발생했습니다.' })
