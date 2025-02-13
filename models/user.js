@@ -114,9 +114,10 @@ module.exports = class User extends Sequelize.Model {
          sourceKey: 'id',
          onDelete: 'CASCADE',
       })
-      User.hasMany(db.ProjectReview, {
+      User.belongsToMany(db.ProjectReview, {
+         through: 'ProjectReviewRecommend',
          foreignKey: 'userId',
-         sourceKey: 'id',
+         otherKey: 'reviewId',
          onDelete: 'CASCADE',
       })
       User.hasOne(db.Creator, {

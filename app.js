@@ -19,6 +19,7 @@ const communityRouter = require('./routes/community')
 const commentRouter = require('./routes/comment')
 const studioRouter = require('./routes/studio')
 
+const adminRouter = require('./routes/admin')
 
 const app = express()
 passportConfig() // passport 실행
@@ -71,6 +72,7 @@ app.use('/rank', rankRouter)
 app.use('/community', communityRouter)
 app.use('/comment', commentRouter)
 app.use('/studio', studioRouter)
+app.use('/admin', adminRouter)
 
 // 잘못된 라우터 경로 처리
 app.use((req, res, next) => {

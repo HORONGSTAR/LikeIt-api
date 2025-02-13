@@ -4,12 +4,6 @@ module.exports = class StudioCommunity extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
-            // 기본 키 (PK)
-            id: {
-               type: Sequelize.INTEGER,
-               primaryKey: true,
-               autoIncrement: true,
-            },
             // 제목
             title: {
                type: Sequelize.STRING(500),
@@ -23,11 +17,6 @@ module.exports = class StudioCommunity extends Sequelize.Model {
             // 이미지 경로
             imgUrl: {
                type: Sequelize.STRING(200),
-            },
-            // 추천수
-            recommend: {
-               type: Sequelize.INTEGER,
-               defaultValue: 0,
             },
             // 공지여부
             notice: {

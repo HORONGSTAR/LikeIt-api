@@ -19,11 +19,6 @@ module.exports = class ProjectTimeline extends Sequelize.Model {
             imgUrl: {
                type: Sequelize.STRING(200),
             },
-            // 추천수
-            recommend: {
-               type: Sequelize.INTEGER,
-               defaultValue: 0,
-            },
          },
          {
             sequelize,
