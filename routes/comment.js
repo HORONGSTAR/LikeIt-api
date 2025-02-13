@@ -4,33 +4,16 @@ const { StudioCommunityComment, User } = require('../models')
 const { isLoggedIn } = require('./middlewares')
 
 // 댓글 생성
-router.post('/', isLoggedIn, async (req, res) => {
+router.post('/:id', isLoggedIn, async (req, res) => {
    try {
-      console.log('댓글 요청 데이터:', req.body) // 요청 데이터 로깅
-      const { comment, communityId } = req.body
-
-      if (!comment || !communityId) {
-         return res.status(400).json({ success: false, message: '내용과 게시물 ID가 필요합니다.' })
-      }
-
-      const newComment = await StudioCommunityComment.create({
-         comment,
-         communityId,
+      await StudioCommunityComment.create({
+         comment: req.body.comment,
+         communityId: req.params.id,
          userId: req.user.id,
       })
 
-      const createdComment = {
-         id: newComment.id,
-         comment: newComment.comment,
-         communityId: newComment.communityId,
-         userId: newComment.userId,
-         name: req.user.name,
-         imgUrl: req.user.imgUrl,
-      }
-
       res.json({
          success: true,
-         comment: createdComment,
          message: '댓글이 성공적으로 등록되었습니다.',
       })
    } catch (error) {
@@ -39,11 +22,10 @@ router.post('/', isLoggedIn, async (req, res) => {
    }
 })
 
-// 특정 게시물의 댓글 가져오기 (페이징 포함)
 router.get('/:id', async (req, res) => {
    try {
       const communityId = req.params.id
-      const { page = 1, limit = 10 } = req.query
+      const { page, limit } = req.query
 
       if (!communityId) {
          return res.status(400).json({ success: false, message: '게시물 ID가 필요합니다.' })
@@ -84,22 +66,18 @@ router.get('/:id', async (req, res) => {
 // 댓글 수정
 router.put('/:id', isLoggedIn, async (req, res) => {
    try {
-      const { id } = req.params
-      const { comment } = req.body
+      const comment = req.body.comment
 
       const existingComment = await StudioCommunityComment.findOne({
-         where: { id, userId: req.user.id }, // 수정: UserId → userId
+         where: { id: req.params.id },
       })
 
-      if (!existingComment) {
-         return res.status(404).json({ success: false, message: '댓글을 찾을 수 없거나 권한이 없습니다.' })
-      }
+      if (!existingComment) return res.status(404).json({ success: false, message: '댓글을 찾을 수 없거나 권한이 없습니다.' })
 
       await existingComment.update({ comment })
 
       res.json({
          success: true,
-         comment: existingComment,
          message: '댓글이 성공적으로 수정되었습니다.',
       })
    } catch (error) {
@@ -111,10 +89,8 @@ router.put('/:id', isLoggedIn, async (req, res) => {
 // 댓글 삭제
 router.delete('/:id', isLoggedIn, async (req, res) => {
    try {
-      const { id } = req.params
-
       const existingComment = await StudioCommunityComment.findOne({
-         where: { id, userId: req.user.id }, // 수정: UserId → userId
+         where: { id: req.params.id },
       })
 
       if (!existingComment) {
