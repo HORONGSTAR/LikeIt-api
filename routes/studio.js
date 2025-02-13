@@ -3,10 +3,13 @@ const router = express.Router()
 const { Project, Studio, User, Creator, StudioCreator, StudioAccount, Order } = require('../models')
 const { Sequelize } = require('sequelize')
 
-router.get('/', async (req, res) => {
+// 스튜디오 조회 (로그인한 유저의 스튜디오만 조회)
+router.get('/:userId', async (req, res) => {
    try {
+      const { userId } = req.params
+
       const studio = await Studio.findOne({
-         where: { id: 1 },
+         where: { userId },
          include: [
             {
                model: StudioCreator,
@@ -23,9 +26,12 @@ router.get('/', async (req, res) => {
          ],
       })
 
+      if (!studio) {
+         return res.status(404).json({ success: false, message: '스튜디오를 찾을 수 없습니다.' })
+      }
+
       const projects = await Project.findAll({
-         subQuery: false,
-         where: { studioId: 1 },
+         where: { studioId: studio.id },
          include: [
             {
                model: Order,
@@ -33,7 +39,6 @@ router.get('/', async (req, res) => {
                required: false,
             },
          ],
-
          attributes: {
             include: [[Sequelize.fn('SUM', Sequelize.col('Orders.orderPrice')), 'totalOrderPrice']],
          },
@@ -53,17 +58,19 @@ router.get('/', async (req, res) => {
    }
 })
 
+// 스튜디오 생성
 router.post('/', async (req, res) => {
    try {
-      const { name, description, snsLinks } = req.body
+      const { name, intro, imgUrl, snsLinks } = req.body
 
-      if (!name || !description) {
-         return res.status(400).json({ success: false, message: '스튜디오 이름과 소개는 필수 입력 항목입니다.' })
+      if (!name || !intro || !imgUrl) {
+         return res.status(400).json({ success: false, message: '스튜디오 이름, 소개, 프로필 이미지는 필수 입력 항목입니다.' })
       }
 
       const newStudio = await Studio.create({
          name,
-         description,
+         intro,
+         imgUrl,
       })
 
       if (snsLinks && snsLinks.length > 0) {
