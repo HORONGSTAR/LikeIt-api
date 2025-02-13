@@ -3,13 +3,11 @@ const router = express.Router()
 const { Project, Studio, User, Creator, StudioCreator, StudioAccount, Order } = require('../models')
 const { Sequelize } = require('sequelize')
 
-// 스튜디오 조회 (로그인한 유저의 스튜디오만 조회)
-router.get('/:userId', async (req, res) => {
+// 스튜디오 조회
+router.get('/', async (req, res) => {
    try {
-      const { userId } = req.params
-
       const studio = await Studio.findOne({
-         where: { userId },
+         where: { id: 1 },
          include: [
             {
                model: StudioCreator,
@@ -26,12 +24,9 @@ router.get('/:userId', async (req, res) => {
          ],
       })
 
-      if (!studio) {
-         return res.status(404).json({ success: false, message: '스튜디오를 찾을 수 없습니다.' })
-      }
-
       const projects = await Project.findAll({
-         where: { studioId: studio.id },
+         subQuery: false,
+         where: { studioId: 1 },
          include: [
             {
                model: Order,
@@ -39,6 +34,7 @@ router.get('/:userId', async (req, res) => {
                required: false,
             },
          ],
+
          attributes: {
             include: [[Sequelize.fn('SUM', Sequelize.col('Orders.orderPrice')), 'totalOrderPrice']],
          },
