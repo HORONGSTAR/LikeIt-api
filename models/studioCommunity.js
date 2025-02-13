@@ -18,11 +18,6 @@ module.exports = class StudioCommunity extends Sequelize.Model {
             imgUrl: {
                type: Sequelize.STRING(200),
             },
-            // 추천수
-            recommend: {
-               type: Sequelize.INTEGER,
-               defaultValue: 0,
-            },
             // 공지여부
             notice: {
                type: Sequelize.ENUM('Y', 'N'),
