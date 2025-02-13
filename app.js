@@ -1,5 +1,4 @@
 const express = require('express')
-
 const path = require('path') // 경로 처리 유틸리티
 const cookieParser = require('cookie-parser') // 쿠키 처리 미들웨어
 const morgan = require('morgan') // HTTP 요청 로깅 미들웨어
@@ -21,6 +20,8 @@ const studioRouter = require('./routes/studio')
 const app = express()
 passportConfig() // passport 실행
 app.set('port', process.env.PORT || 8002)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
+app.use('/uploads/studioImg', express.static(path.join(__dirname, 'uploads/studioImg')))
 
 // 시퀄라이즈를 사용한 DB연결
 sequelize
