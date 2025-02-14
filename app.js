@@ -21,7 +21,6 @@ const app = express()
 passportConfig() // passport 실행
 app.set('port', process.env.PORT || 8002)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
-app.use('/uploads/studioImg', express.static(path.join(__dirname, 'uploads/studioImg')))
 
 // 시퀄라이즈를 사용한 DB연결
 sequelize
