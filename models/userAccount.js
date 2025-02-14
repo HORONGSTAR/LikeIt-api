@@ -15,6 +15,10 @@ module.exports = class UserAccount extends Sequelize.Model {
                type: Sequelize.ENUM('GOOGLE', 'KAKAO'),
                allowNull: false,
             },
+            // 프로필 아이디
+            profileId: {
+               type: Sequelize.STRING(100),
+            },
          },
          {
             sequelize,

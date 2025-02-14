@@ -12,15 +12,12 @@ router.get('/list', async (req, res) => {
       const communities = await StudioCommunity.findAll({
          limit,
          offset,
+         attributes: ['id', 'title', 'notice', 'createdAt'],
          order: [['createdAt', 'DESC']],
          include: [
             {
                model: User,
                attributes: ['name', 'imgUrl'],
-            },
-            {
-               model: StudioCommunityComment,
-               attributes: ['id'],
             },
          ],
       })
@@ -39,7 +36,8 @@ router.get('/:id', async (req, res) => {
          where: { id: req.params.id },
          include: [
             {
-               model: StudioCommunityComment,
+               model: User,
+               attributes: ['name', 'imgUrl'],
             },
          ],
       })

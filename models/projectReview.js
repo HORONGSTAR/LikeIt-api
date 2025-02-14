@@ -18,11 +18,6 @@ module.exports = class ProjectReview extends Sequelize.Model {
             imgUrl: {
                type: Sequelize.STRING(200),
             },
-            // 추천수
-            recommend: {
-               type: Sequelize.INTEGER,
-               defaultValue: 0,
-            },
          },
          {
             sequelize,
@@ -44,9 +39,10 @@ module.exports = class ProjectReview extends Sequelize.Model {
          targetKey: 'id',
          onDelete: 'CASCADE',
       })
-      ProjectReview.belongsTo(db.User, {
-         foreignKey: 'userId',
-         targetKey: 'id',
+      ProjectReview.belongsToMany(db.User, {
+         through: 'ProjectReviewRecommend',
+         foreignKey: 'reviewId',
+         otherKey: 'userId',
          onDelete: 'CASCADE',
       })
    }
