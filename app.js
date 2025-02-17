@@ -1,5 +1,4 @@
 const express = require('express')
-
 const path = require('path') // 경로 처리 유틸리티
 const cookieParser = require('cookie-parser') // 쿠키 처리 미들웨어
 const morgan = require('morgan') // HTTP 요청 로깅 미들웨어
@@ -19,12 +18,13 @@ const communityRouter = require('./routes/community')
 const commentRouter = require('./routes/comment')
 const studioRouter = require('./routes/studio')
 const pageRouter = require('./routes/page')
-
+const creatorRouter = require('./routes/creator')
 const adminRouter = require('./routes/admin')
 
 const app = express()
 passportConfig() // passport 실행
 app.set('port', process.env.PORT || 8002)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
 // 시퀄라이즈를 사용한 DB연결
 sequelize
@@ -75,6 +75,7 @@ app.use('/community', communityRouter)
 app.use('/comment', commentRouter)
 app.use('/studio', studioRouter)
 app.use('/admin', adminRouter)
+app.use('/creator', creatorRouter)
 
 // 잘못된 라우터 경로 처리
 app.use((req, res, next) => {
