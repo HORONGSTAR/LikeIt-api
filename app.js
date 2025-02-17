@@ -18,6 +18,7 @@ const rankRouter = require('./routes/rank')
 const communityRouter = require('./routes/community')
 const commentRouter = require('./routes/comment')
 const studioRouter = require('./routes/studio')
+const pageRouter = require('./routes/page')
 
 const adminRouter = require('./routes/admin')
 
@@ -68,6 +69,7 @@ app.use(passport.session()) // Passport와 생성해둔 세션 연결
 app.use('/', indexRouter)
 app.use('/list', listRouter)
 app.use('/auth', authRouter)
+app.use('/page', pageRouter)
 app.use('/rank', rankRouter)
 app.use('/community', communityRouter)
 app.use('/comment', commentRouter)
