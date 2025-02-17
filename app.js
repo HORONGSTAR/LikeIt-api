@@ -17,7 +17,7 @@ const rankRouter = require('./routes/rank')
 const communityRouter = require('./routes/community')
 const commentRouter = require('./routes/comment')
 const studioRouter = require('./routes/studio')
-
+const creatorRouter = require('./routes/creator')
 const adminRouter = require('./routes/admin')
 
 const app = express()
@@ -73,6 +73,7 @@ app.use('/community', communityRouter)
 app.use('/comment', commentRouter)
 app.use('/studio', studioRouter)
 app.use('/admin', adminRouter)
+app.use('/creator', creatorRouter)
 
 // 잘못된 라우터 경로 처리
 app.use((req, res, next) => {
