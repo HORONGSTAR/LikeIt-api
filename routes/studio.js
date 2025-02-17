@@ -3,17 +3,37 @@ const router = express.Router()
 const multer = require('multer')
 const { Project, Studio, User, Creator, StudioCreator, StudioAccount, Order } = require('../models')
 const { Sequelize } = require('sequelize')
+const fs = require('fs')
+const path = require('path')
 
-const storage = multer.diskStorage({
-   destination: (req, file, cb) => {
-      cb(null, 'uploads/studioImg/') // 업로드 경로 설정
-   },
-   filename: (req, file, cb) => {
-      cb(null, `${Date.now()}_${file.originalname}`) // 고유한 파일명 생성
-   },
+try {
+   fs.readdirSync('uploads')
+} catch (err) {
+   console.log('uploads 폴더 생성')
+   fs.mkdirSync('uploads')
+}
+
+try {
+   fs.readdirSync('uploads/studioImg')
+} catch (err) {
+   console.log('studioImg 폴더 생성')
+   fs.mkdirSync('uploads/studioImg')
+}
+
+const upload = multer({
+   storage: multer.diskStorage({
+      destination(req, file, cb) {
+         cb(null, 'uploads/studioImg/')
+      },
+      filename(req, file, cb) {
+         const decodedFileName = decodeURIComponent(file.originalname)
+         const ext = path.extname(decodedFileName)
+         const basename = path.basename(decodedFileName, ext)
+         cb(null, basename + Date.now() + ext)
+      },
+   }),
+   limits: { fileSize: 6 * 1024 * 1024 },
 })
-
-const upload = multer({ storage })
 
 // 스튜디오 조회
 router.get('/', async (req, res) => {
@@ -72,35 +92,44 @@ router.get('/', async (req, res) => {
 // 스튜디오 생성
 router.post('/', upload.single('image'), async (req, res) => {
    try {
-      const { name, intro, snsLinks } = req.body
+      const { name, intro, account } = req.body
 
-      if (!name || !intro) {
-         return res.status(400).json({ success: false, message: '스튜디오 이름과 소개는 필수 입력 항목입니다.' })
+      const creatorId = (
+         await Creator.findOne({
+            where: { userId: req.user.id },
+            attributes: ['id'],
+         })
+      )?.id
+
+      if (!creatorId) {
+         return res.status(400).json({ success: false, message: '창작자 정보를 찾을 수 없습니다.' })
       }
-
-      //  이미지가 있을 경우 imgUrl 설정
-      const imgUrl = req.file ? `/uploads/studioImg/${req.file.filename}` : null
 
       const newStudio = await Studio.create({
          name,
          intro,
-         imgUrl,
+         imgUrl: req.file.filename,
       })
 
-      // snsLinks JSON 변환
-      const parsedSnsLinks = typeof snsLinks === 'string' ? JSON.parse(snsLinks) : snsLinks || []
+      await StudioCreator.create({
+         role: 'LEADER',
+         communityAdmin: 'Y',
+         spaceAdmin: 'Y',
+         creatorId: creatorId,
+         studioId: newStudio.id,
+      })
 
-      if (parsedSnsLinks.length > 0) {
-         await Promise.all(
-            parsedSnsLinks.map((sns) =>
-               StudioAccount.create({
-                  studioId: newStudio.id,
-                  platform: sns.platform,
-                  link: sns.link,
-               })
-            )
-         )
-      }
+      const snsLinks = JSON.parse(account).snsLinks
+
+      await Promise.all(
+         snsLinks.map((sns) => {
+            StudioAccount.create({
+               studioId: newStudio.id,
+               type: sns.type,
+               contents: sns.contents,
+            })
+         })
+      )
 
       res.json({
          success: true,
@@ -117,7 +146,7 @@ router.post('/', upload.single('image'), async (req, res) => {
 router.put('/:id', upload.single('image'), async (req, res) => {
    try {
       const { id } = req.params
-      const { name, intro, sns_links } = req.body
+      const { name, intro, account } = req.body
       const imageUrl = req.file ? `/uploads/studioImg/${req.file.filename}` : null
 
       const studio = await Studio.findByPk(id)
@@ -128,9 +157,22 @@ router.put('/:id', upload.single('image'), async (req, res) => {
       await studio.update({
          name,
          intro,
-         snsLinks: sns_links ? JSON.parse(sns_links) : [],
          imgUrl: imageUrl || studio.imgUrl,
       })
+
+      const { snsLinks, removeSns } = JSON.parse(account)
+
+      await snsLinks.map(
+         (sns) =>
+            sns.id ||
+            StudioAccount.create({
+               studioId: id,
+               type: sns.type,
+               contents: sns.contents,
+            })
+      )
+
+      await removeSns.map((id) => StudioAccount.destroy({ where: { id: id } }))
 
       res.json({ success: true, message: '스튜디오 정보가 수정되었습니다.', studio })
    } catch (error) {
@@ -187,23 +229,6 @@ router.get('/:id', async (req, res) => {
    } catch (error) {
       console.error('스튜디오 조회 오류:', error)
       res.status(500).json({ success: false, message: '스튜디오를 불러오는 중 오류가 발생했습니다.' })
-   }
-})
-
-// 업로드
-router.post('/upload', upload.single('image'), (req, res) => {
-   try {
-      if (!req.file) {
-         return res.status(400).json({ success: false, message: '파일이 업로드되지 않았습니다.' })
-      }
-
-      console.log('업로드된 파일:', req.file) // 로그 추가
-
-      const fileUrl = `/uploads/studioImg/${req.file.filename}`
-      res.json({ success: true, imgUrl: fileUrl })
-   } catch (error) {
-      console.error('파일 업로드 오류:', error)
-      res.status(500).json({ success: false, message: '서버 오류: 파일 업로드 실패' })
    }
 })
 
