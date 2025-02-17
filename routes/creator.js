@@ -82,4 +82,23 @@ router.post('/', async (req, res) => {
    }
 })
 
+// 창작자 삭제
+router.delete('/:id', async (req, res) => {
+   try {
+      const { id } = req.params
+
+      const creator = await StudioCreator.findOne({ where: { id } })
+      if (!creator) {
+         return res.status(404).json({ success: false, message: '해당 창작자를 찾을 수 없습니다.' })
+      }
+
+      await creator.destroy()
+
+      res.json({ success: true, message: '창작자가 스튜디오에서 삭제되었습니다.' })
+   } catch (error) {
+      console.error('창작자 삭제 실패:', error)
+      res.status(500).json({ success: false, message: '서버 오류', error })
+   }
+})
+
 module.exports = router
