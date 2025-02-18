@@ -1,7 +1,38 @@
 const express = require('express')
-const { StudioCommunity, User, StudioCommunityComment } = require('../models')
-
+const { StudioCommunity, User } = require('../models')
+const multer = require('multer')
 const router = express.Router()
+const path = require('path')
+const fs = require('fs')
+
+try {
+   fs.readdirSync('uploads')
+} catch (err) {
+   console.log('uploads 폴더 생성')
+   fs.mkdirSync('uploads')
+}
+
+try {
+   fs.readdirSync('uploads/studioImg')
+} catch (err) {
+   console.log('studioImg 폴더 생성')
+   fs.mkdirSync('uploads/studioImg')
+}
+
+const upload = multer({
+   storage: multer.diskStorage({
+      destination(req, file, cb) {
+         cb(null, 'uploads/studioImg/')
+      },
+      filename(req, file, cb) {
+         const decodedFileName = decodeURIComponent(file.originalname)
+         const ext = path.extname(decodedFileName)
+         const basename = path.basename(decodedFileName, ext)
+         cb(null, basename + Date.now() + ext)
+      },
+   }),
+   limits: { fileSize: 50 * 1024 * 1024 },
+})
 
 // 커뮤니티 목록 조회
 router.get('/list', async (req, res) => {
@@ -9,7 +40,15 @@ router.get('/list', async (req, res) => {
       const page = parseInt(req.query.page, 10) || 1
       const limit = parseInt(req.query.limit, 10) || 4
       const offset = (page - 1) * limit
+      const { studioId } = req.query
+
+      const where = {}
+      if (studioId) {
+         where.studioId = studioId
+      }
+
       const communities = await StudioCommunity.findAll({
+         where,
          limit,
          offset,
          attributes: ['id', 'title', 'notice', 'createdAt'],
@@ -53,17 +92,21 @@ router.get('/:id', async (req, res) => {
 })
 
 // 게시물 등록
-router.post('/', async (req, res) => {
+router.post('/', upload.single('image'), async (req, res) => {
    try {
-      const { title, contents, userId } = req.body
+      const { title, contents, studioId, userId } = req.body
 
-      if (!title || !contents || !userId) {
-         return res.status(400).json({ success: false, message: '제목, 내용, 작성자 ID는 필수입니다.' })
+      if (!studioId || !userId) {
+         return res.status(400).json({ success: false, message: '스튜디오 ID 또는 사용자 ID가 없습니다.' })
       }
+
+      const imgUrl = req.file ? `/uploads/studioImg/${req.file.filename}` : null
 
       const newPost = await StudioCommunity.create({
          title,
          contents,
+         imgUrl,
+         studioId,
          userId,
       })
 
