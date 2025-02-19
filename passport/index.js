@@ -1,7 +1,7 @@
 const passport = require('passport')
 const local = require('./localStrategy')
-const User = require('../models/user')
 const google = require('./googleStrategy')
+const { User, Creator, StudioCreator, UserAccount } = require('../models')
 
 module.exports = () => {
    //직렬화(serializeUser): 로그인 성공 후 사용자 정보를 세션에 저장
@@ -14,11 +14,26 @@ module.exports = () => {
    passport.deserializeUser((id, done) => {
       //response 해주고 싶은 사용자 정보를 작성
       // select * from users where id = ?
+
       User.findOne({
          where: { id },
          attributes: ['id', 'email', 'name', 'phone', 'imgUrl', 'point', 'role', 'createdAt'],
+         include: [
+            {
+               model: Creator,
+               attributes: ['id'],
+               include: [
+                  {
+                     model: StudioCreator,
+                     attributes: ['studioId'],
+                  },
+               ],
+            },
+         ],
       }) //id는 직렬화에서 저장한user.id
-         .then((user) => done(null, user)) // 가져온 사용자 객체 정보를 반환
+         .then((user) => {
+            done(null, user)
+         }) // 가져온 사용자 객체 정보를 반환
          .catch((err) => done(err)) //에러 발생시 에러 반환
    })
 
