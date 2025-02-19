@@ -51,7 +51,7 @@ router.get('/list', async (req, res) => {
          where,
          limit,
          offset,
-         attributes: ['id', 'title', 'notice', 'createdAt'],
+         attributes: ['id', 'title', 'notice', 'studioId', 'createdAt'],
          order: [['createdAt', 'DESC']],
          include: [
             {
