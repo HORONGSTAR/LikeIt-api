@@ -149,7 +149,19 @@ router.get('/:type', async (req, res) => {
             offset,
             subQuery: false,
             attributes: {
-               include: [[Sequelize.fn('COUNT', Sequelize.col('Users.id')), 'userCount']],
+               include: [
+                  [Sequelize.fn('COUNT', Sequelize.col('Users.id')), 'userCount'],
+                  [
+                     Sequelize.literal(`
+               CASE 
+                  WHEN ${req.user ? `(SELECT COUNT(*) FROM ProjectFavorite WHERE ProjectFavorite.projectId = Project.id AND ProjectFavorite.userId = ${req.user.id})` : '0'} > 0 
+                  THEN 1 
+                  ELSE 0 
+               END
+            `),
+                     'isFavorite',
+                  ],
+               ],
             },
             include: [
                {
@@ -175,7 +187,6 @@ router.get('/:type', async (req, res) => {
          })
          projects.comming = tempProject
       }
-
       res.json({
          success: true,
          message: '프로젝트 목록 조회 성공',
@@ -188,6 +199,7 @@ router.get('/:type', async (req, res) => {
    }
 })
 
+// 팔로우 스튜디오 목록 호출
 router.get('/follow/:id', async (req, res) => {
    try {
       const page = parseInt(req.query.page, 10) || 1
@@ -240,4 +252,45 @@ router.get('/follow/:id', async (req, res) => {
    }
 })
 
+// 공개예정 프로젝트 알림 신청
+router.post('/notice/reg/:id', async (req, res) => {
+   try {
+      const userId = req.user.id
+      const projectId = req.params.id
+
+      const user = await User.findByPk(userId)
+      const project = await Project.findByPk(projectId)
+
+      await user.addProject(project)
+
+      res.json({
+         success: true,
+         message: '알림 신청 성공',
+      })
+   } catch (error) {
+      console.error(error)
+      res.status(500).json({ success: false, message: '프로젝트 알림 상태를 변경하는데 문제가 발생했습니다.' })
+   }
+})
+
+// 공개예정 프로젝트 알림 해제
+router.delete('/notice/del/:id', async (req, res) => {
+   try {
+      const userId = req.user.id
+      const projectId = req.params.id
+
+      const user = await User.findByPk(userId)
+      const project = await Project.findByPk(projectId)
+
+      await user.removeProject(project)
+
+      res.json({
+         success: true,
+         message: '알림 신청 성공',
+      })
+   } catch (error) {
+      console.error(error)
+      res.status(500).json({ success: false, message: '프로젝트 알림 상태를 변경하는데 문제가 발생했습니다.' })
+   }
+})
 module.exports = router
