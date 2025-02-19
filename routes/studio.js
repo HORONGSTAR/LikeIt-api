@@ -155,26 +155,37 @@ router.put('/:id', upload.single('image'), async (req, res) => {
       }
 
       await studio.update({
-         name,
-         intro,
+         name: name || studio.name,
+         intro: intro || studio.intro,
          imgUrl: imageUrl || studio.imgUrl,
       })
 
-      const { snsLinks, removeSns } = JSON.parse(account)
+      // const { snsLinks, removeSns } = JSON.parse(account)
 
-      await snsLinks.map(
-         (sns) =>
-            sns.id ||
-            StudioAccount.create({
-               studioId: id,
-               type: sns.type,
-               contents: sns.contents,
-            })
-      )
+      // await snsLinks.map(
+      //    (sns) =>
+      //       sns.id ||
+      //       StudioAccount.create({
+      //          studioId: id,
+      //          type: sns.type,
+      //          contents: sns.contents,
+      //       })
+      // )
 
-      await removeSns.map((id) => StudioAccount.destroy({ where: { id: id } }))
+      // await removeSns.map((id) => StudioAccount.destroy({ where: { id: id } }))
 
-      res.json({ success: true, message: '스튜디오 정보가 수정되었습니다.', studio })
+      const updatedStudio = await Studio.findOne({
+         where: { id },
+         include: [
+            {
+               model: StudioCreator,
+               include: [{ model: Creator, include: [User] }],
+            },
+            { model: StudioAccount },
+         ],
+      })
+
+      res.json({ success: true, message: '스튜디오 정보가 수정되었습니다.', studio: updatedStudio })
    } catch (error) {
       console.error('스튜디오 업데이트 오류:', error)
       res.status(500).json({ success: false, message: '서버 오류 발생', error: error.message })
