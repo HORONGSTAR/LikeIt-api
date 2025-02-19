@@ -102,6 +102,7 @@ router.post('/login', isNotLoggedIn, async (req, res, next) => {
          }
          //로그인 성공시
          //status code를 주지 않으면 기본값은 200
+
          res.json({
             success: true,
             message: '로그인 성공',
@@ -109,6 +110,8 @@ router.post('/login', isNotLoggedIn, async (req, res, next) => {
                id: user.id,
                name: user.name,
                role: user.role,
+               creatorId: user.Creator?.id,
+               studioId: user.Creator?.StudioCreator?.id,
             },
          })
       })
@@ -242,6 +245,8 @@ router.get('/status', async (req, res, next) => {
             name: req.user.name,
             email: req.user.email,
             role: req.user.role,
+            creatorId: req.user.Creator?.id,
+            studioId: req.user.Creator?.StudioCreator?.id,
          },
       })
    } else {
@@ -300,7 +305,12 @@ router.post('/setpassword', async (req, res, next) => {
          const allChars = upper + lower + digits + special
 
          // Ensure at least one of each category
-         let password = [upper[Math.floor(Math.random() * upper.length)], lower[Math.floor(Math.random() * lower.length)], digits[Math.floor(Math.random() * digits.length)], special[Math.floor(Math.random() * special.length)]]
+         let password = [
+            upper[Math.floor(Math.random() * upper.length)],
+            lower[Math.floor(Math.random() * lower.length)],
+            digits[Math.floor(Math.random() * digits.length)],
+            special[Math.floor(Math.random() * special.length)],
+         ]
 
          // Fill the remaining length
          for (let i = password.length; i < length; i++) {

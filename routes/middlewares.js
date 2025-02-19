@@ -29,3 +29,22 @@ exports.isNotLoggedIn = (req, res, next) => {
 }
 
 //관리자 권한 확인 미들웨어
+
+//창작자 권한 확인 미들웨어
+exports.isCreator = (req, res, next) => {
+   if (req.isAuthenticated()) {
+      if (req.user?.Creator?.id) {
+         next()
+      } else {
+         res.status(403).json({
+            success: false,
+            message: '창작자 등록이 필요합니다.',
+         })
+      }
+   } else {
+      res.status(403).json({
+         success: false,
+         message: '로그인이 필요합니다.',
+      })
+   }
+}
