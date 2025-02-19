@@ -15,13 +15,14 @@ router.get('/', async (req, res) => {
          limit,
          subQuery: false,
          attributes: {
-            include: [[Sequelize.fn('COUNT', Sequelize.col('ProjectReviews.id')), 'userCount']],
+            include: [[Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('DirectReviews.id'))), 'userCount']],
          },
          include: [
             {
                model: ProjectReview,
                attributes: [],
                required: false,
+               as: 'DirectReviews',
             },
          ],
          group: ['User.id'],
@@ -83,21 +84,25 @@ router.get('/:id', async (req, res) => {
    try {
       const { id } = req.params
       const query = `
-   WITH RankedUsers AS (
-      SELECT 
-         Users.id,
-         COUNT(ProjectReviews.id) AS reviewCount,
-         COUNT(Orders.id) AS orderCount,
-         SUM(Orders.orderPrice) AS priceSum,
-         RANK() OVER (ORDER BY COUNT(ProjectReviews.id) DESC) AS reviewRank,
-         RANK() OVER (ORDER BY COUNT(Orders.id) DESC) AS orderRank,
-         RANK() OVER (ORDER BY SUM(Orders.orderPrice) DESC) AS priceRank
-      FROM Users
-      LEFT JOIN ProjectReviews ON Users.id = ProjectReviews.userId
-      LEFT JOIN Orders ON Users.id = Orders.userId
-      GROUP BY Users.id
-   )
-   SELECT * FROM RankedUsers WHERE id = :id;
+WITH RankedUsers AS (
+   SELECT 
+      Users.id,
+      COUNT(DISTINCT DirectReviews.id) AS reviewCount,
+      COUNT(DISTINCT Orders.id) AS orderCount,
+      SUM(Orders.orderPrice) AS priceSum,
+      RANK() OVER (ORDER BY COUNT(DISTINCT DirectReviews.id) DESC) AS reviewRank,
+      RANK() OVER (ORDER BY COUNT(DISTINCT Orders.id) DESC) AS orderRank,
+      RANK() OVER (ORDER BY SUM(Orders.orderPrice) DESC) AS priceRank
+   FROM Users
+   LEFT JOIN ProjectReviews AS DirectReviews
+      ON Users.id = DirectReviews.userId
+      AND DirectReviews.deletedAt IS NULL
+   LEFT JOIN Orders 
+      ON Users.id = Orders.userId
+   WHERE Users.deletedAt IS NULL
+   GROUP BY Users.id
+)
+SELECT * FROM RankedUsers WHERE id = :id;
 `
       const myRank = await sequelize.query(query, {
          type: Sequelize.QueryTypes.SELECT,
