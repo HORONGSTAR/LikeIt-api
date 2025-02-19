@@ -84,7 +84,8 @@ router.get('/:id', async (req, res) => {
       if (!community) {
          return res.status(404).json({ success: false, message: '게시물을 찾을 수 없습니다.' })
       }
-      res.json({ success: true, community })
+      const response = { ...community.toJSON(), imgUrl: community.imgUrl || '' }
+      res.json({ success: true, community: response })
    } catch (error) {
       console.error(error)
       res.status(500).json({ success: false, message: '게시물을 불러오는 중 오류가 발생했습니다.', error })
@@ -118,19 +119,27 @@ router.post('/', upload.single('image'), async (req, res) => {
 })
 
 // 게시물 수정
-router.put('/:id', async (req, res) => {
+router.put('/:id', upload.single('image'), async (req, res) => {
    try {
-      const { title, contents } = req.body
       const { id } = req.params
+      const { title, contents, removeImage } = req.body
 
       const community = await StudioCommunity.findByPk(id)
       if (!community) {
          return res.status(404).json({ success: false, message: '게시물을 찾을 수 없습니다.' })
       }
 
+      let imgUrl = community.imgUrl // 기본적으로 기존 이미지 유지
+      if (req.file) {
+         imgUrl = `/uploads/studioImg/${req.file.filename}` // 새 이미지 업로드
+      } else if (removeImage === 'true') {
+         imgUrl = null // 기존 이미지 삭제
+      }
+
       await community.update({
          title: title || community.title,
          contents: contents || community.contents,
+         imgUrl,
       })
 
       res.json({ success: true, community, message: '게시물이 수정되었습니다.' })
