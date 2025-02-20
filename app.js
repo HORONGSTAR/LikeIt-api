@@ -77,7 +77,7 @@ app.use('/studio', studioRouter)
 app.use('/admin', adminRouter)
 app.use('/creator', creatorRouter)
 app.use('/project', projectRouter)
-app.use('/project/reward', rewardRouter)
+app.use('/project/item', rewardRouter)
 
 // 잘못된 라우터 경로 처리
 app.use((req, res, next) => {

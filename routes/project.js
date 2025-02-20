@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const multer = require('multer')
-const { Project, Studio, User, Creator, StudioCreator, StudioAccount, Order } = require('../models')
+const { Project, Studio, User, Creator, StudioCreator, StudioAccount, Order, RewardProduct, Reward } = require('../models')
 const { isCreator } = require('./middlewares')
 const { Sequelize } = require('sequelize')
 const fs = require('fs')
@@ -79,9 +79,10 @@ router.post('/create', isCreator, async (req, res) => {
 // 프로젝트 수정
 router.put('/edit/:id', upload.single('image'), async (req, res) => {
    try {
-      const { id } = req.params
-
-      const project = await Project.findByPk(id)
+      const project = await Project.findOne({
+         where: { id: req.params.id },
+         include: [{ model: RewardProduct }, { model: Reward }],
+      })
       if (!project) {
          return res.status(401).json({ success: false, message: '해당 프로젝트가 존재하지 않습니다.' })
       }
@@ -103,6 +104,7 @@ router.get('/:id', async (req, res) => {
    try {
       const project = await Project.findOne({
          where: { id: req.params.id },
+         include: [{ model: RewardProduct }, { model: Reward }],
       })
 
       res.json({
