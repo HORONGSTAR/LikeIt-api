@@ -39,38 +39,75 @@ router.get('/', async (req, res) => {
       const page = parseInt(req.query.page, 10) || 1
       const limit = parseInt(req.query.limit, 10) || 8
       const offset = (page - 1) * limit
-      const count = await Project.count({
-         where: {
-            proposalStatus: { [Sequelize.Op.not]: 'WRITING' },
+      const searchTerm = req.query.searchTerm || ''
+      const selectProposal = req.query.selectProposal
+      const selectCategory = req.query.selectCategory
+      let noBanner = false
+      let banner = false
+
+      if (req.query.selectBanner === 'NO_BANNER') noBanner = true
+      if (req.query.selectBanner === 'BANNER') banner = true
+
+      const whereClause = {
+         proposalStatus: { [Sequelize.Op.not]: 'WRITING' },
+         ...(searchTerm && {
+            title: {
+               [Sequelize.Op.like]: `%${searchTerm}%`,
+            },
+         }),
+         ...(selectProposal && {
+            proposalStatus: selectProposal,
+         }),
+         ...(selectCategory && {
+            categoryId: selectCategory,
+         }),
+         ...(noBanner ? { '$BannerProject.projectId$': null } : {}),
+      }
+
+      const includeClause = [
+         {
+            model: Studio,
+            attributes: ['name'],
          },
+         banner
+            ? {
+                 model: BannerProject,
+                 attributes: ['id'],
+                 required: true, // BannerProject가 있는 데이터만 가져옴
+              }
+            : {
+                 model: BannerProject,
+                 attributes: ['id'],
+                 required: false, // 기본값: LEFT OUTER JOIN (모든 데이터)
+              },
+         {
+            model: Order,
+            attributes: [],
+            required: false,
+         },
+      ]
+
+      const count = await Project.count({
+         distinct: true,
+         where: {
+            ...whereClause,
+         },
+         include: includeClause,
       })
+
       const projects = await Project.findAll({
          limit,
          offset,
          subQuery: false,
          where: {
-            proposalStatus: { [Sequelize.Op.not]: 'WRITING' },
+            ...whereClause,
          },
          attributes: {
             include: [[Sequelize.fn('SUM', Sequelize.col('Orders.orderPrice')), 'totalOrderPrice']], // orderPrice 합계 계산
          },
          order: [['UpdatedAt', 'DESC']],
-         include: [
-            {
-               model: Studio,
-               attributes: ['name'],
-            },
-            {
-               model: BannerProject,
-               attributes: ['id'],
-            },
-            {
-               model: Order,
-               attributes: [],
-               required: false,
-            },
-         ],
-         group: ['Project.id', 'BannerProject.id'],
+         include: includeClause,
+         group: ['Project.id', 'BannerProject.id'].filter(Boolean),
       })
       res.json({
          success: true,

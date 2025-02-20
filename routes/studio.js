@@ -86,11 +86,12 @@ router.post('/', isCreator, upload.single('image'), async (req, res) => {
    try {
       const { name, intro, account } = req.body
       const creatorId = req.user.Creator.id
+      const imgUrl = req.file ? `/uploads/studioImg/${req.file.filename}` : null
 
       const newStudio = await Studio.create({
          name,
          intro,
-         imgUrl: req.file.filename,
+         imgUrl,
       })
 
       await StudioCreator.create({
@@ -131,7 +132,6 @@ router.put('/:id', isCreator, upload.single('image'), async (req, res) => {
    try {
       const { id } = req.params
       const { name, intro, account } = req.body
-      const imageUrl = req.file ? `/uploads/studioImg/${req.file.filename}` : null
 
       const studio = await Studio.findByPk(id)
       if (!studio) {
@@ -141,7 +141,7 @@ router.put('/:id', isCreator, upload.single('image'), async (req, res) => {
       await studio.update({
          name,
          intro,
-         imgUrl: imageUrl || studio.imgUrl,
+         imgUrl: req.file ? `/uploads/studioImg/${req.file.filename}` : studio.imgUrl,
       })
 
       const { snsLinks, removeSns } = JSON.parse(account)

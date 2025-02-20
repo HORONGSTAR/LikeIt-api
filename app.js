@@ -17,10 +17,12 @@ const rankRouter = require('./routes/rank')
 const communityRouter = require('./routes/community')
 const commentRouter = require('./routes/comment')
 const studioRouter = require('./routes/studio')
-const creatorRouter = require('./routes/creator')
+const pageRouter = require('./routes/page')
 const adminRouter = require('./routes/admin')
 const projectRouter = require('./routes/project')
 const rewardRouter = require('./routes/reward')
+const creatorRouter = require('./routes/creator')
+const fundingRouter = require('./routes/funding')
 
 const app = express()
 passportConfig() // passport 실행
@@ -70,6 +72,7 @@ app.use(passport.session()) // Passport와 생성해둔 세션 연결
 app.use('/', indexRouter)
 app.use('/list', listRouter)
 app.use('/auth', authRouter)
+app.use('/page', pageRouter)
 app.use('/rank', rankRouter)
 app.use('/community', communityRouter)
 app.use('/comment', commentRouter)
@@ -78,6 +81,7 @@ app.use('/admin', adminRouter)
 app.use('/creator', creatorRouter)
 app.use('/project', projectRouter)
 app.use('/project/item', rewardRouter)
+app.use('/funding', fundingRouter)
 
 // 잘못된 라우터 경로 처리
 app.use((req, res, next) => {
