@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const multer = require('multer')
-const { Project, Studio, User, Creator, StudioCreator, StudioAccount, Order, RewardProduct, Reward } = require('../models')
+const { Project, Studio, User, Creator, StudioCreator, RewardProductRelation, RewardProduct, Reward } = require('../models')
 const { isCreator } = require('./middlewares')
 const { Sequelize } = require('sequelize')
 const fs = require('fs')
@@ -91,6 +91,36 @@ router.put('/edit/:id', upload.single('image'), async (req, res) => {
          ...req.body,
          imgUrl: req.file ? `/${req.file.filename}` : project.imgUrl,
       })
+
+      const { rewards } = JSON.parse(req.body.rewards)
+
+      await Promise.all(
+         rewards.map((reward) => {
+            Reward.create({
+               name: reward.name,
+               contents: reward.contents,
+               count: reward.count,
+               price: reward.price,
+               stock: reward.stock,
+               limit: reward.limit,
+               projectId: project.id,
+            })
+         })
+      )
+
+      const newRewards = await Reward.findAll({ where: { projectId: project.id } })
+
+      await Promise.all(
+         rewards.map((reward, index) => {
+            reward.relation.map((r) => {
+               RewardProductRelation.create({
+                  stock: r.count,
+                  rewardId: newRewards[index].id,
+                  productId: r.id,
+               })
+            })
+         })
+      )
 
       res.json({ success: true, message: '프로젝트 정보가 수정되었습니다.', project })
    } catch (error) {
