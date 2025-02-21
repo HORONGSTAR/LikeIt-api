@@ -341,6 +341,22 @@ router.post('/setpassword', async (req, res, next) => {
    }
 })
 
+//이메일 가져오기
+router.get('/email', async (req, res) => {
+   try {
+      const user = await User.findOne({ where: { phone: req.body.phone } })
+
+      res.json({
+         success: true,
+         email: user.email,
+         message: '이메일을 성공적으로 불러왔습니다.',
+      })
+   } catch (error) {
+      console.error(error)
+      res.status(500).json({ success: false, message: '가입한 이메일을 불러오는 중 오류가 발생했습니다.', error })
+   }
+})
+
 //이메일 변경
 router.put('/changeemail', async (req, res, next) => {
    const user = await User.findOne({ where: { id: req.user.id } })
