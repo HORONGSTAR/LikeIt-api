@@ -43,12 +43,14 @@ module.exports = class ProjectReview extends Sequelize.Model {
          foreignKey: 'userId',
          targetKey: 'id',
          onDelete: 'CASCADE',
+         as: 'DirectReviews',
       })
       ProjectReview.belongsToMany(db.User, {
          through: 'ProjectReviewRecommend',
          foreignKey: 'reviewId',
          otherKey: 'userId',
          onDelete: 'CASCADE',
+         as: 'ReviewsRecommends',
       })
    }
 }

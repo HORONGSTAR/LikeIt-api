@@ -8,7 +8,6 @@ module.exports = class ProjectTimeline extends Sequelize.Model {
             title: {
                type: Sequelize.STRING(200),
                allowNull: false,
-               unique: true,
             },
             // 내용
             contents: {
