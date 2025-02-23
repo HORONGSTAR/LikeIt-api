@@ -53,7 +53,9 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
          name: nickname,
          password: hash,
          role: 'USER',
+         imgUrl: '/default_profile.png',
       })
+
       // 위 코드 findOrCreate하면 줄일수 있는지 여쭤보고 성능에도 영향 미치는지 여쭤보기.
 
       res.status(201).json({
@@ -110,6 +112,7 @@ router.post('/login', isNotLoggedIn, async (req, res, next) => {
                id: user.id,
                name: user.name,
                role: user.role,
+               imgUrl: user.imgUrl,
                creatorId: user.Creator?.id,
                studioId: user.Creator?.StudioCreator?.id,
             },
@@ -245,6 +248,7 @@ router.get('/status', async (req, res, next) => {
             name: req.user.name,
             email: req.user.email,
             role: req.user.role,
+            imgUrl: req.user.imgUrl || '/default_profile.png',
             creatorId: req.user.Creator?.id,
             studioId: req.user.Creator?.StudioCreator?.id,
          },
@@ -305,12 +309,7 @@ router.post('/setpassword', async (req, res, next) => {
          const allChars = upper + lower + digits + special
 
          // Ensure at least one of each category
-         let password = [
-            upper[Math.floor(Math.random() * upper.length)],
-            lower[Math.floor(Math.random() * lower.length)],
-            digits[Math.floor(Math.random() * digits.length)],
-            special[Math.floor(Math.random() * special.length)],
-         ]
+         let password = [upper[Math.floor(Math.random() * upper.length)], lower[Math.floor(Math.random() * lower.length)], digits[Math.floor(Math.random() * digits.length)], special[Math.floor(Math.random() * special.length)]]
 
          // Fill the remaining length
          for (let i = password.length; i < length; i++) {
