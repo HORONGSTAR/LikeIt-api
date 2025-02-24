@@ -4,7 +4,7 @@ const { isLoggedIn } = require('./middlewares')
 const fs = require('fs')
 const multer = require('multer')
 const path = require('path')
-const { User, Creator, Category } = require('../models')
+const { User, Creator, Category, Order, Project } = require('../models')
 
 try {
    fs.readdirSync('uploads') //해당 폴더가 있는 지 확인
@@ -32,13 +32,13 @@ const upload = multer({
 //프로필 조회 localhost:8000/page/profile
 router.get('/profile', isLoggedIn, async (req, res) => {
    try {
-      //   const creator = await Creator.findOne({ where: { userId: req.user.id }, include: Category })
-
       const user = await User.findOne({ where: { id: req.user.id }, include: { model: Creator, include: Category } })
+      const userWithOrders = await User.findOne({ where: { id: req.user.id }, include: { model: Order, include: { model: Project } } })
 
       res.json({
          success: true,
          user: user,
+         userWithOrders: userWithOrders,
          message: '프로필 정보를 성공적으로 가져왔습니다.',
       })
    } catch (error) {
@@ -105,5 +105,19 @@ router.put('/category', isLoggedIn, async (req, res) => {
       res.status(500).json({ success: false, message: '프로필 수정 중 오류가 발생했습니다.', error })
    }
 })
+
+// router.get('/sponsor', isLoggedIn, async (req, res) => {
+//    try {
+//       const user = await User.findOne({ where: { id: req.user.id }, include: { model: Order, include: { model: Project } } })
+//       res.json({
+//          success: true,
+//          user: user,
+//          message: '후원유전자자 정보를 성공적으로 가져왔습니다.',
+//       })
+//    } catch (error) {
+//       console.error(error)
+//       res.status(500).json({ success: false, message: ' 중 오류가 발생했습니다.', error })
+//    }
+// })
 
 module.exports = router

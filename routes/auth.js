@@ -342,10 +342,9 @@ router.post('/setpassword', async (req, res, next) => {
 })
 
 //이메일 가져오기
-router.get('/email', async (req, res) => {
+router.post('/email', async (req, res) => {
    try {
-      const user = await User.findOne({ where: { phone: req.body.phone } })
-
+      const user = await User.findOne({ where: { phone: req.body.trimmedPhone } })
       res.json({
          success: true,
          email: user.email,
