@@ -6,6 +6,7 @@ const { User, Creator, StudioCreator } = require('../models')
 router.get('/:studioId', async (req, res) => {
    try {
       const { studioId } = req.params
+
       const creators = await StudioCreator.findAll({
          where: { studioId },
          include: [
