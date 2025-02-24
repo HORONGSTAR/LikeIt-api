@@ -53,7 +53,9 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
          name: nickname,
          password: hash,
          role: 'USER',
+         imgUrl: '/default_profile.png',
       })
+
       // 위 코드 findOrCreate하면 줄일수 있는지 여쭤보고 성능에도 영향 미치는지 여쭤보기.
 
       res.status(201).json({
@@ -102,6 +104,7 @@ router.post('/login', isNotLoggedIn, async (req, res, next) => {
          }
          //로그인 성공시
          //status code를 주지 않으면 기본값은 200
+
          res.json({
             success: true,
             message: '로그인 성공',
@@ -109,6 +112,9 @@ router.post('/login', isNotLoggedIn, async (req, res, next) => {
                id: user.id,
                name: user.name,
                role: user.role,
+               imgUrl: user.imgUrl,
+               creatorId: user.Creator?.id,
+               studioId: user.Creator?.StudioCreator?.id,
             },
          })
       })
@@ -242,6 +248,9 @@ router.get('/status', async (req, res, next) => {
             name: req.user.name,
             email: req.user.email,
             role: req.user.role,
+            imgUrl: req.user.imgUrl || '/default_profile.png',
+            creatorId: req.user.Creator?.id,
+            studioId: req.user.Creator?.StudioCreator?.id,
          },
       })
    } else {

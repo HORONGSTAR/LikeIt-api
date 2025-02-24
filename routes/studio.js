@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const multer = require('multer')
 const { Project, Studio, User, Creator, StudioCreator, StudioAccount, Order } = require('../models')
+const { isCreator } = require('./middlewares')
 const { Sequelize } = require('sequelize')
 const fs = require('fs')
 const path = require('path')
@@ -36,18 +37,9 @@ const upload = multer({
 })
 
 // 스튜디오 조회
-router.get('/', async (req, res) => {
+router.get('/', isCreator, async (req, res) => {
    try {
-      const creatorId = (
-         await Creator.findOne({
-            where: { userId: req.user.id },
-            attributes: ['id'],
-         })
-      )?.id
-
-      if (!creatorId) {
-         return res.status(400).json({ success: false, message: '창작자 정보를 찾을 수 없습니다.' })
-      }
+      const creatorId = req.user.Creator.id
 
       const studioId = (
          await StudioCreator.findOne({
@@ -57,7 +49,7 @@ router.get('/', async (req, res) => {
       )?.studioId
 
       if (!studioId) {
-         return res.status(400).json({ success: false, message: '스튜디오를 찾을 수 없습니다.' })
+         return res.status(204).json({ success: false, message: '생성한 스튜디오가 없습니다.' })
       }
 
       const studio = await Studio.findOne({
@@ -90,25 +82,16 @@ router.get('/', async (req, res) => {
 })
 
 // 스튜디오 생성
-router.post('/', upload.single('image'), async (req, res) => {
+router.post('/', isCreator, upload.single('image'), async (req, res) => {
    try {
       const { name, intro, account } = req.body
-
-      const creatorId = (
-         await Creator.findOne({
-            where: { userId: req.user.id },
-            attributes: ['id'],
-         })
-      )?.id
-
-      if (!creatorId) {
-         return res.status(400).json({ success: false, message: '창작자 정보를 찾을 수 없습니다.' })
-      }
+      const creatorId = req.user.Creator.id
+      const imgUrl = req.file ? `/uploads/studioImg/${req.file.filename}` : null
 
       const newStudio = await Studio.create({
          name,
          intro,
-         imgUrl: req.file.filename,
+         imgUrl,
       })
 
       await StudioCreator.create({
@@ -131,6 +114,8 @@ router.post('/', upload.single('image'), async (req, res) => {
          })
       )
 
+      console.log(newStudio)
+
       res.json({
          success: true,
          message: '스튜디오가 성공적으로 생성되었습니다.',
@@ -143,21 +128,20 @@ router.post('/', upload.single('image'), async (req, res) => {
 })
 
 // 스튜디오 수정
-router.put('/:id', upload.single('image'), async (req, res) => {
+router.put('/:id', isCreator, upload.single('image'), async (req, res) => {
    try {
       const { id } = req.params
       const { name, intro, account } = req.body
-      const imageUrl = req.file ? `/uploads/studioImg/${req.file.filename}` : null
 
       const studio = await Studio.findByPk(id)
       if (!studio) {
-         return res.status(404).json({ success: false, message: '해당 스튜디오가 존재하지 않습니다.' })
+         return res.status(401).json({ success: false, message: '해당 스튜디오가 존재하지 않습니다.' })
       }
 
       await studio.update({
          name,
          intro,
-         imgUrl: imageUrl || studio.imgUrl,
+         imgUrl: req.file ? `/uploads/studioImg/${req.file.filename}` : studio.imgUrl,
       })
 
       const { snsLinks, removeSns } = JSON.parse(account)

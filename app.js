@@ -19,8 +19,11 @@ const commentRouter = require('./routes/comment')
 const studioRouter = require('./routes/studio')
 const pageRouter = require('./routes/page')
 const adminRouter = require('./routes/admin')
+const projectRouter = require('./routes/project')
+const rewardRouter = require('./routes/reward')
 const creatorRouter = require('./routes/creator')
 const fundingRouter = require('./routes/funding')
+const orderRouter = require('./routes/order')
 
 const app = express()
 passportConfig() // passport 실행
@@ -77,7 +80,10 @@ app.use('/comment', commentRouter)
 app.use('/studio', studioRouter)
 app.use('/admin', adminRouter)
 app.use('/creator', creatorRouter)
+app.use('/project', projectRouter)
+app.use('/project/item', rewardRouter)
 app.use('/funding', fundingRouter)
+app.use('/order', orderRouter)
 
 // 잘못된 라우터 경로 처리
 app.use((req, res, next) => {
