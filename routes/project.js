@@ -36,6 +36,36 @@ const upload = multer({
    limits: { fileSize: 6 * 1024 * 1024 },
 })
 
+// 특정 스튜디오의 프로젝트 목록 조회
+router.get('/studio/:studioId', async (req, res) => {
+   const page = parseInt(req.query.page) || 1
+   const limit = parseInt(req.query.limit) || 5
+   const offset = (page - 1) * limit
+
+   try {
+      const { studioId } = req.params
+      const { rows: projects, count } = await Project.findAndCountAll({
+         where: { studioId },
+         include: [{ model: RewardProduct }, { model: Reward }],
+         order: [['startDate', 'DESC']],
+         offset,
+         limit,
+      })
+
+      res.json({
+         success: true,
+         message: '특정 스튜디오의 프로젝트 목록 조회 성공',
+         projects,
+         totalCount: count,
+         currentPage: page,
+         totalPages: Math.ceil(count / limit),
+      })
+   } catch (error) {
+      console.error('특정 스튜디오의 프로젝트 조회 오류:', error)
+      res.status(500).json({ success: false, message: '서버 오류', error })
+   }
+})
+
 // 프로젝트 생성
 router.post('/create', isCreator, async (req, res) => {
    try {
