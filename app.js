@@ -81,7 +81,7 @@ app.use('/studio', studioRouter)
 app.use('/admin', adminRouter)
 app.use('/creator', creatorRouter)
 app.use('/project', projectRouter)
-app.use('/project/item', rewardRouter)
+app.use('/project/reward', rewardRouter)
 app.use('/funding', fundingRouter)
 app.use('/order', orderRouter)
 

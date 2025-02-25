@@ -104,6 +104,11 @@ module.exports = class Project extends Sequelize.Model {
          sourceKey: 'id',
          onDelete: 'CASCADE',
       })
+      Project.hasMany(db.CreatorBudget, {
+         foreignKey: 'projectId',
+         sourceKey: 'id',
+         onDelete: 'CASCADE',
+      })
       Project.hasOne(db.BannerProject, {
          foreignKey: 'projectId',
          sourceKey: 'id',

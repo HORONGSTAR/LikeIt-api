@@ -114,8 +114,6 @@ router.post('/', isCreator, upload.single('image'), async (req, res) => {
          })
       )
 
-      console.log(newStudio)
-
       res.json({
          success: true,
          message: '스튜디오가 성공적으로 생성되었습니다.',

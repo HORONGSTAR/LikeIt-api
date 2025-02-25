@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const multer = require('multer')
-const { Project, Reward, RewardProduct, RewardProductRelation } = require('../models')
+const { Reward, RewardProduct, RewardProductRelation } = require('../models')
 const { isCreator } = require('./middlewares')
 const fs = require('fs')
 const path = require('path')
@@ -33,29 +33,6 @@ const upload = multer({
       },
    }),
    limits: { fileSize: 6 * 1024 * 1024 },
-})
-
-// 특정 프로젝트 선물 조회
-router.get('/:id', async (req, res) => {
-   try {
-      const project = await Project.findOne({
-         where: { id: req.params.id },
-         attributes: [],
-         include: [{ model: RewardProduct }, { model: Reward, include: [{ model: RewardProduct, attributes: ['title'] }] }],
-      })
-
-      const { RewardProducts, Rewards } = project
-
-      res.json({
-         success: true,
-         message: '선물 조회 성공',
-         products: RewardProducts,
-         rewards: Rewards,
-      })
-   } catch (error) {
-      console.error('선물 조회 오류:', error)
-      res.status(500).json({ success: false, message: '선물 목록을 불러오는 중 오류가 발생했습니다.' })
-   }
 })
 
 // 선물 구성품 생성
@@ -150,7 +127,7 @@ router.delete('/product/:id', async (req, res) => {
 })
 
 // 후원 선물 생성
-router.post('/reward/:id', async (req, res) => {
+router.post('/:id', async (req, res) => {
    try {
       const projectId = req.params.id
       const { relation } = JSON.parse(req.body.relation)
@@ -186,7 +163,7 @@ router.post('/reward/:id', async (req, res) => {
 })
 
 // 후원 선물 수정
-router.put('/reward/:id', async (req, res) => {
+router.put('/:id', async (req, res) => {
    try {
       const { id } = req.params
       const { relation } = JSON.parse(req.body.relation)
@@ -231,7 +208,7 @@ router.put('/reward/:id', async (req, res) => {
 })
 
 // 후원 선물 삭제
-router.delete('/reward/:id', async (req, res) => {
+router.delete('/:id', async (req, res) => {
    try {
       const { id } = req.params
 
