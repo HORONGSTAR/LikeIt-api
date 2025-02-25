@@ -1,11 +1,12 @@
 const express = require('express')
 const router = express.Router()
 const multer = require('multer')
-const { Project, Studio, User, Creator, StudioCreator, RewardProductRelation, RewardProduct, Reward } = require('../models')
+const { Project, StudioCreator, RewardProduct, Reward, ProjectBudget, CreatorBudget } = require('../models')
 const { isCreator } = require('./middlewares')
 const { Sequelize } = require('sequelize')
 const fs = require('fs')
 const path = require('path')
+const e = require('express')
 
 try {
    fs.readdirSync('uploads')
@@ -34,6 +35,36 @@ const upload = multer({
       },
    }),
    limits: { fileSize: 6 * 1024 * 1024 },
+})
+
+// 특정 스튜디오의 프로젝트 목록 조회
+router.get('/studio/:studioId', async (req, res) => {
+   const page = parseInt(req.query.page) || 1
+   const limit = parseInt(req.query.limit) || 5
+   const offset = (page - 1) * limit
+
+   try {
+      const { studioId } = req.params
+      const { rows: projects, count } = await Project.findAndCountAll({
+         where: { studioId },
+         include: [{ model: RewardProduct }, { model: Reward }],
+         order: [['startDate', 'DESC']],
+         offset,
+         limit,
+      })
+
+      res.json({
+         success: true,
+         message: '특정 스튜디오의 프로젝트 목록 조회 성공',
+         projects,
+         totalCount: count,
+         currentPage: page,
+         totalPages: Math.ceil(count / limit),
+      })
+   } catch (error) {
+      console.error('특정 스튜디오의 프로젝트 조회 오류:', error)
+      res.status(500).json({ success: false, message: '서버 오류', error })
+   }
 })
 
 // 프로젝트 생성
@@ -79,10 +110,8 @@ router.post('/create', isCreator, async (req, res) => {
 // 프로젝트 수정
 router.put('/edit/:id', upload.single('image'), async (req, res) => {
    try {
-      const project = await Project.findOne({
-         where: { id: req.params.id },
-         include: [{ model: RewardProduct }, { model: Reward }],
-      })
+      const project = await Project.findByPk(req.params.id)
+
       if (!project) {
          return res.status(401).json({ success: false, message: '해당 프로젝트가 존재하지 않습니다.' })
       }
@@ -92,37 +121,47 @@ router.put('/edit/:id', upload.single('image'), async (req, res) => {
          imgUrl: req.file ? `/${req.file.filename}` : project.imgUrl,
       })
 
-      const { rewards } = JSON.parse(req.body.rewards)
+      const budget = {}
+      if (req.body.projBudg) {
+         const { projBudg, removeProjBudg } = JSON.parse(req.body.projBudg)
+         const { creaBudg, removeCreaBudg } = JSON.parse(req.body.creaBudg)
 
-      await Promise.all(
-         rewards.map((reward) => {
-            Reward.create({
-               name: reward.name,
-               contents: reward.contents,
-               count: reward.count,
-               price: reward.price,
-               stock: reward.stock,
-               limit: reward.limit,
-               projectId: project.id,
-            })
-         })
-      )
+         await removeProjBudg.map((id) => ProjectBudget.destroy({ where: { id: id } }))
+         await removeCreaBudg.map((id) => CreatorBudget.destroy({ where: { id: id } }))
 
-      const newRewards = await Reward.findAll({ where: { projectId: project.id } })
-
-      await Promise.all(
-         rewards.map((reward, index) => {
-            reward.relation.map((r) => {
-               RewardProductRelation.create({
-                  stock: r.count,
-                  rewardId: newRewards[index].id,
-                  productId: r.id,
+         const projectBudgets = await Promise.all(
+            projBudg.map((p) =>
+               ProjectBudget.upsert({
+                  id: p.id,
+                  contents: p.contents,
+                  money: p.money,
+                  projectId: project.id,
                })
-            })
-         })
-      )
+            )
+         )
 
-      res.json({ success: true, message: '프로젝트 정보가 수정되었습니다.', project })
+         const creatorBudgets = await Promise.all(
+            creaBudg.map((c) =>
+               CreatorBudget.upsert({
+                  id: c.id,
+                  contents: c.contents,
+                  money: c.money,
+                  studioCreatorId: c.studioCreatorId,
+                  projectId: project.id,
+               })
+            )
+         )
+
+         budget.ProjectBudgets = projectBudgets.map((p) => p[0])
+         budget.CreatorBudgets = creatorBudgets.map((c) => c[0])
+      }
+
+      res.json({
+         success: true,
+         message: '프로젝트 정보가 수정되었습니다.',
+         project,
+         budget,
+      })
    } catch (error) {
       console.error('프로젝트 업데이트 오류:', error)
       res.status(500).json({ success: false, message: '서버 오류 발생', error: error.message })
@@ -134,7 +173,15 @@ router.get('/:id', async (req, res) => {
    try {
       const project = await Project.findOne({
          where: { id: req.params.id },
-         include: [{ model: RewardProduct }, { model: Reward }],
+         include: [
+            { model: RewardProduct },
+            {
+               model: Reward,
+               include: [{ model: RewardProduct, attributes: ['id', 'title'] }],
+            },
+            { model: ProjectBudget },
+            { model: CreatorBudget },
+         ],
       })
 
       res.json({
