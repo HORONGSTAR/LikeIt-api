@@ -4,7 +4,7 @@ const { isLoggedIn } = require('./middlewares')
 const fs = require('fs')
 const multer = require('multer')
 const path = require('path')
-const { User, Creator, Category, Order, Project } = require('../models')
+const { User, Creator, Category, Order, Project, Point } = require('../models')
 
 try {
    fs.readdirSync('uploads') //해당 폴더가 있는 지 확인
@@ -34,16 +34,18 @@ router.get('/profile', isLoggedIn, async (req, res) => {
    try {
       const user = await User.findOne({ where: { id: req.user.id }, include: { model: Creator, include: Category } })
       const userWithOrders = await User.findOne({ where: { id: req.user.id }, include: { model: Order, include: { model: Project } } })
+      const points = await Point.findAll({ where: { userId: req.user.id } })
 
       res.json({
          success: true,
          user: user,
          userWithOrders: userWithOrders,
+         points: points,
          message: '프로필 정보를 성공적으로 가져왔습니다.',
       })
    } catch (error) {
       console.error(error)
-      res.status(500).json({ success: false, message: '프로필 수정 중 오류가 발생했습니다.', error })
+      res.status(500).json({ success: false, message: '프로필 조회 중 오류가 발생했습니다.', error })
    }
 })
 
@@ -75,27 +77,25 @@ router.put('/profile', isLoggedIn, upload.single('img'), async (req, res) => {
 //카테고리 추가 및 수정
 router.put('/category', isLoggedIn, async (req, res) => {
    try {
-      const creator = await Creator.findOne({ where: { userId: req.user.id } })
-
-      if (!creator) {
-         return res.status(400).json({ error: 'creator가 아닙니다.' })
-      }
-
       const selectedCategories = req.body.selectedCategories
 
       if (!selectedCategories) {
-         return res.status(400).json({ error: '카테고리 변경에 실패하였습니다.' })
+         return res.status(400).json({ error: '카테고리가 변경되지 않았습니다.' })
       }
 
-      console.log(selectedCategories)
+      console.log('selectedCategories:', selectedCategories)
 
-      //   console.log(Object.getOwnPropertyNames(creator.__proto__))
+      let creator = await Creator.findOne({ where: { userId: req.user.id } })
+
+      if (!creator) {
+         //  return res.status(400).json({ error: 'creator가 아닙니다.' })
+         creator = await Creator.create({ userId: req.user.id, profit: 0 })
+      }
 
       await creator.setCategories([]) //데이터 초기화
 
       for (let selectedCategory of selectedCategories) {
          const category = await Category.findOne({ where: { categoryName: selectedCategory } })
-         console.log(category)
          await creator.addCategories(category)
       }
 
