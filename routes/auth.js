@@ -112,6 +112,7 @@ router.post('/login', isNotLoggedIn, async (req, res, next) => {
                id: user.id,
                name: user.name,
                role: user.role,
+               point: req.user.point,
                imgUrl: user.imgUrl,
                creatorId: user.Creator?.id,
                studioId: user.Creator?.StudioCreator?.id,
@@ -248,6 +249,7 @@ router.get('/status', async (req, res, next) => {
             name: req.user.name,
             email: req.user.email,
             role: req.user.role,
+            point: req.user.point,
             imgUrl: req.user.imgUrl || '/default_profile.png',
             creatorId: req.user.Creator?.id,
             studioId: req.user.Creator?.StudioCreator?.id,
@@ -351,10 +353,9 @@ router.post('/setpassword', async (req, res, next) => {
 })
 
 //이메일 가져오기
-router.get('/email', async (req, res) => {
+router.post('/email', async (req, res) => {
    try {
-      const user = await User.findOne({ where: { phone: req.body.phone } })
-
+      const user = await User.findOne({ where: { phone: req.body.trimmedPhone } })
       res.json({
          success: true,
          email: user.email,
