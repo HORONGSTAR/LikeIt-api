@@ -6,6 +6,7 @@ const session = require('express-session') // 세션 관리 미들웨어
 const passport = require('passport') // 인증 미들웨어
 require('dotenv').config() // 환경 변수 관리
 const cors = require('cors') // cors 미들웨어 -> api 서버는 반드시 설정해줘야함
+const cronJobs = require('./cron')
 
 // 라우터 및 기타 모듈 불러오기
 const { sequelize } = require('./models')
@@ -27,6 +28,7 @@ const orderRouter = require('./routes/order')
 
 const app = express()
 passportConfig() // passport 실행
+cronJobs() // cron 실행
 app.set('port', process.env.PORT || 8002)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 

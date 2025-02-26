@@ -371,8 +371,6 @@ router.post('/order', isLoggedIn, async (req, res) => {
       // 3. 모든 조건을 만족하면 stock 차감 업데이트 실행
       const caseStockUpdate = orderData.map(({ rewardId, orderCount }) => `WHEN ${rewardId} THEN stock - ${orderCount}`).join(' ')
       const rewardIds = orderData.map(({ rewardId }) => rewardId) // 업데이트할 ID 배열
-      console.log('test1 :', caseStockUpdate)
-      console.log('test2 :', rewardIds)
       await Reward.update(
          {
             stock: Sequelize.literal(`CASE id ${caseStockUpdate} END`),
