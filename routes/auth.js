@@ -115,7 +115,7 @@ router.post('/login', isNotLoggedIn, async (req, res, next) => {
                point: req.user.point,
                imgUrl: user.imgUrl,
                creatorId: user.Creator?.id,
-               studioId: user.Creator?.StudioCreator?.id,
+               studioId: req.user.Creator?.StudioCreators[0]?.studioId,
             },
          })
       })
@@ -252,7 +252,7 @@ router.get('/status', async (req, res, next) => {
             point: req.user.point,
             imgUrl: req.user.imgUrl || '/default_profile.png',
             creatorId: req.user.Creator?.id,
-            studioId: req.user.Creator?.StudioCreator?.id,
+            studioId: req.user.Creator?.StudioCreators[0]?.studioId,
          },
       })
    } else {
@@ -311,7 +311,12 @@ router.post('/setpassword', async (req, res, next) => {
          const allChars = upper + lower + digits + special
 
          // Ensure at least one of each category
-         let password = [upper[Math.floor(Math.random() * upper.length)], lower[Math.floor(Math.random() * lower.length)], digits[Math.floor(Math.random() * digits.length)], special[Math.floor(Math.random() * special.length)]]
+         let password = [
+            upper[Math.floor(Math.random() * upper.length)],
+            lower[Math.floor(Math.random() * lower.length)],
+            digits[Math.floor(Math.random() * digits.length)],
+            special[Math.floor(Math.random() * special.length)],
+         ]
 
          // Fill the remaining length
          for (let i = password.length; i < length; i++) {
