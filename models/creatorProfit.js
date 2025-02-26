@@ -20,8 +20,8 @@ module.exports = class CreatorProfit extends Sequelize.Model {
             // 변동일
             timestamps: true,
             underscored: false,
-            modelName: 'CreatorProfit ',
-            tableName: 'CreatorProfits',
+            modelName: 'CreatorProfit',
+            tableName: 'creatorProfits',
             paranoid: false,
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',
