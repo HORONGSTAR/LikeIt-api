@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const multer = require('multer')
-const { Reward, RewardProduct, RewardProductRelation } = require('../models')
+const { Reward, RewardProduct, RewardProductRelation, Project } = require('../models')
 const { isCreator } = require('./middlewares')
 const fs = require('fs')
 const path = require('path')
@@ -33,6 +33,31 @@ const upload = multer({
       },
    }),
    limits: { fileSize: 6 * 1024 * 1024 },
+})
+
+router.get('/:id', async (req, res) => {
+   try {
+      const project = await Project.findOne({
+         where: { id: req.params.id },
+         attributes: [],
+         include: [
+            { model: RewardProduct },
+            {
+               model: Reward,
+               include: [{ model: RewardProduct, attributes: ['id', 'title'] }],
+            },
+         ],
+      })
+
+      res.json({
+         success: true,
+         message: '프로젝트 조회 성공',
+         reward: { RewardProducts: project.RewardProducts, Rewards: project.Rewards },
+      })
+   } catch (error) {
+      console.error('프로젝트 조회 오류:', error)
+      res.status(500).json({ success: false, message: '프로젝트를 불러오는 중 오류가 발생했습니다.' })
+   }
 })
 
 // 선물 구성품 생성
