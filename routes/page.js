@@ -33,12 +33,14 @@ const upload = multer({
 router.get('/profile', isLoggedIn, async (req, res) => {
    try {
       const user = await User.findOne({ where: { id: req.user.id }, include: { model: Creator, include: Category } })
-      //const userWithOrders = await User.findOne({ where: { id: req.user.id }, include: { model: Order, include: { model: Project } } })
-      //const rewards = await Reward.findAll({ include: { model: Order, where: { userId: req.user.id } } })
       const orders = await Order.findAll({ where: { userId: req.user.id }, include: { model: Reward, include: { model: Project } } })
       const points = await Point.findAll({ where: { userId: req.user.id } })
-      const creator = await Creator.findOne({ where: { userId: req.user.id } })
-      const profits = await CreatorProfit.findAll({ where: { creatorId: creator.id } })
+      let profits
+      if (user.Creator) {
+         profits = await CreatorProfit.findAll({ where: { creatorId: user.Creator.id } })
+      } else {
+         profits = []
+      }
       const allProjects = await Project.findAll()
 
       res.json({
