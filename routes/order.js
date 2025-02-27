@@ -3,6 +3,56 @@ const router = express.Router()
 const { Order, User, Reward, Project } = require('../models')
 const { isCreator } = require('./middlewares')
 const { Sequelize } = require('sequelize')
+const multer = require('multer')
+const xlsx = require('xlsx')
+
+const upload = multer({ dest: 'uploads/' })
+
+// 운송장 등록
+router.post('/upload-tracking', isCreator, upload.single('file'), async (req, res) => {
+   try {
+      if (!req.file) {
+         return res.status(400).json({ success: false, message: '엑셀 파일을 업로드해주세요.' })
+      }
+
+      const workbook = xlsx.readFile(req.file.path)
+      const sheetName = workbook.SheetNames[0]
+      const sheet = workbook.Sheets[sheetName]
+      const jsonData = xlsx.utils.sheet_to_json(sheet)
+
+      if (!jsonData.length) {
+         return res.status(400).json({ success: false, message: '엑셀 파일이 비어 있습니다.' })
+      }
+
+      let updatedCount = 0
+
+      for (const row of jsonData) {
+         const { 주문ID, 택배사, 운송장번호 } = row
+         console.log('엑셀에서 읽은 데이터:', 주문ID, 택배사, 운송장번호) // 디버깅용
+
+         if (!주문ID || !택배사 || !운송장번호) continue
+
+         const order = await Order.findByPk(주문ID)
+         if (!order) {
+            console.log(`주문ID ${주문ID}을 찾을 수 없습니다.`)
+            continue
+         }
+
+         await order.update({
+            orderTrackingNumber: 운송장번호,
+            shippingCompany: 택배사,
+            shippingStatus: '배송 중',
+         })
+
+         updatedCount++
+      }
+
+      res.json({ success: true, message: `${updatedCount}건의 운송장 번호가 등록되었습니다.` })
+   } catch (error) {
+      console.error('운송장 업로드 오류:', error)
+      res.status(500).json({ success: false, message: '서버 오류 발생' })
+   }
+})
 
 // 특정 프로젝트의 후원자 후원 목록 및 선물 통계 조회
 router.get('/project/:id', async (req, res) => {
