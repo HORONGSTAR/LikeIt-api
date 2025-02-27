@@ -26,6 +26,7 @@ const rewardRouter = require('./routes/reward')
 const creatorRouter = require('./routes/creator')
 const fundingRouter = require('./routes/funding')
 const orderRouter = require('./routes/order')
+const timelineRouter = require('./routes/timeline')
 
 const app = express()
 passportConfig() // passport 실행
@@ -85,6 +86,7 @@ app.use('/project', projectRouter)
 app.use('/project/reward', rewardRouter)
 app.use('/funding', fundingRouter)
 app.use('/order', orderRouter)
+app.use('/timeline', timelineRouter)
 
 // HTTP 서버 생성
 const server = http.createServer(app)

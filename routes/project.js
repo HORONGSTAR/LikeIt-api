@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const multer = require('multer')
-const { Project, StudioCreator, RewardProduct, Reward, ProjectBudget, CreatorBudget } = require('../models')
+const { Project, StudioCreator, RewardProduct, Reward, ProjectBudget, CreatorBudget, Studio } = require('../models')
 const { isCreator } = require('./middlewares')
 const fs = require('fs')
 const path = require('path')
@@ -189,6 +189,10 @@ router.get('/:id', async (req, res) => {
             },
             { model: ProjectBudget },
             { model: CreatorBudget },
+            {
+               model: Studio,
+               attributes: ['name'],
+            },
          ],
       })
 
@@ -196,6 +200,7 @@ router.get('/:id', async (req, res) => {
          success: true,
          message: '프로젝트 조회 성공',
          project,
+         studioName: project.Studio ? project.Studio.name : null,
       })
    } catch (error) {
       console.error('프로젝트 조회 오류:', error)
