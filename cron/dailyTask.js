@@ -52,6 +52,9 @@ module.exports = async () => {
             project.update({ projectStatus: 'FUNDING_FAILED' })
          }
       })
+      // order 변경
+
+      //
       await logEntry.update({ finishedAt: new Date() })
 
       console.log(`[${taskName}] 작업 완료`)
