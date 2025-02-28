@@ -181,6 +181,10 @@ router.get('/:id', async (req, res) => {
             {
                model: StudioAccount,
             },
+            {
+               model: User,
+               through: 'StudioFavorite',
+            },
          ],
       })
 

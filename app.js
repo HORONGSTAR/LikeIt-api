@@ -6,6 +6,8 @@ const session = require('express-session') // 세션 관리 미들웨어
 const passport = require('passport') // 인증 미들웨어
 require('dotenv').config() // 환경 변수 관리
 const cors = require('cors') // cors 미들웨어 -> api 서버는 반드시 설정해줘야함
+const http = require('http') // HTTP 모듈 추가
+const socketIO = require('./socket')
 const cronJobs = require('./cron')
 
 // 라우터 및 기타 모듈 불러오기
@@ -25,6 +27,7 @@ const rewardRouter = require('./routes/reward')
 const creatorRouter = require('./routes/creator')
 const fundingRouter = require('./routes/funding')
 const orderRouter = require('./routes/order')
+const timelineRouter = require('./routes/timeline')
 const messageRouter = require('./routes/message')
 
 const app = express()
@@ -56,18 +59,17 @@ app.use(express.json()) // JSON 데이터 파싱
 app.use(express.urlencoded({ extended: false })) // URL-encoded 데이터 파싱
 app.use(cookieParser(process.env.COOKIE_SECRET)) // 쿠키 설정
 // 세션 설정
-app.use(
-   session({
-      resave: false, // 세션 데이터가 변경되면 재저장 할지 여부 -> 변경사항이 있어야 재저장
-      saveUninitialized: true, // 초기화 되지 않은 세션 저장 여부 -> 초기화되지 않은 빈 세션도 저장
-      secret: process.env.COOKIE_SECRET, // 세션 암호화 키
-      cookie: {
-         httpOnly: true, // javascript로 쿠키에 접근 가능한지 여부 -> true일시 접근불가
-         secure: false, // https를 사용할때만 쿠키 전송 여부 -> http, https 둘다 사용 가능
-      },
-   })
-)
+const sessionMiddleware = session({
+   resave: false, // 세션 데이터가 변경되면 재저장 할지 여부 -> 변경사항이 있어야 재저장
+   saveUninitialized: true, // 초기화 되지 않은 세션 저장 여부 -> 초기화되지 않은 빈 세션도 저장
+   secret: process.env.COOKIE_SECRET, // 세션 암호화 키
+   cookie: {
+      httpOnly: true, // javascript로 쿠키에 접근 가능한지 여부 -> true일시 접근불가
+      secure: false, // https를 사용할때만 쿠키 전송 여부 -> http, https 둘다 사용 가능
+   },
+})
 
+app.use(sessionMiddleware)
 // Passport 초기화, 세션 연동
 app.use(passport.initialize()) // 초기화
 app.use(passport.session()) // Passport와 생성해둔 세션 연결
@@ -87,7 +89,15 @@ app.use('/project', projectRouter)
 app.use('/project/reward', rewardRouter)
 app.use('/funding', fundingRouter)
 app.use('/order', orderRouter)
+app.use('/timeline', timelineRouter)
 app.use('/message', messageRouter)
+
+// HTTP 서버 생성
+const server = http.createServer(app)
+
+// Socket.IO 초기화 및 서버와 연결
+socketIO(server, sessionMiddleware)
+
 
 // 잘못된 라우터 경로 처리
 app.use((req, res, next) => {
@@ -112,6 +122,6 @@ app.use((err, req, res, next) => {
 
 app.options('*', cors()) // 모든 경로에 대한 options 요청을 허용
 
-app.listen(app.get('port'), () => {
+server.listen(app.get('port'), () => {
    console.log(app.get('port'), '번 포트에서 대기중')
 })

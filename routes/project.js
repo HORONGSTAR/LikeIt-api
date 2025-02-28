@@ -1,9 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const multer = require('multer')
-const { Project, StudioCreator, RewardProduct, Reward, ProjectBudget, CreatorBudget } = require('../models')
+const { Project, StudioCreator, RewardProduct, Reward, ProjectBudget, CreatorBudget, Studio } = require('../models')
 const { isCreator } = require('./middlewares')
-const { Sequelize } = require('sequelize')
 const fs = require('fs')
 const path = require('path')
 const e = require('express')
@@ -110,7 +109,16 @@ router.post('/create', isCreator, async (req, res) => {
 // 프로젝트 수정
 router.put('/edit/:id', upload.single('image'), async (req, res) => {
    try {
-      const project = await Project.findByPk(req.params.id)
+      const project = await Project.findOne({
+         where: { id: req.params.id },
+         include: [
+            { model: RewardProduct },
+            {
+               model: Reward,
+               include: [{ model: RewardProduct, attributes: ['id', 'title'] }],
+            },
+         ],
+      })
 
       if (!project) {
          return res.status(401).json({ success: false, message: '해당 프로젝트가 존재하지 않습니다.' })
@@ -181,6 +189,10 @@ router.get('/:id', async (req, res) => {
             },
             { model: ProjectBudget },
             { model: CreatorBudget },
+            {
+               model: Studio,
+               attributes: ['name'],
+            },
          ],
       })
 
@@ -188,6 +200,7 @@ router.get('/:id', async (req, res) => {
          success: true,
          message: '프로젝트 조회 성공',
          project,
+         studioName: project.Studio ? project.Studio.name : null,
       })
    } catch (error) {
       console.error('프로젝트 조회 오류:', error)
