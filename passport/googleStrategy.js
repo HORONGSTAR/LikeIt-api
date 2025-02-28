@@ -18,10 +18,10 @@ module.exports = () => {
             console.log('엑세스토큰:', accessToken)
             try {
                const exUserAccount = await UserAccount.findOne({
-                  // 구글 플랫폼에서 로그인 했고 & snsId필드에 구글 아이디가 일치할경우
+                  // 구글 플랫폼에서 로그인 했고 & profileId필드에 구글 아이디가 일치할경우
                   where: { profileId: profile.id, accountType: 'GOOGLE' },
                })
-               // SocialAccount객체에서 find해서
+               // User 객체에서 find해서
                // 이미 가입된 구글 프로필이면 성공
                if (exUserAccount) {
                   const exUser = await User.findOne({

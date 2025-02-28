@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize')
 
-module.exports = class creatorProfit extends Sequelize.Model {
+module.exports = class CreatorProfit extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
@@ -20,8 +20,8 @@ module.exports = class creatorProfit extends Sequelize.Model {
             // 변동일
             timestamps: true,
             underscored: false,
-            modelName: 'Point',
-            tableName: 'points',
+            modelName: 'CreatorProfit',
+            tableName: 'creatorProfits',
             paranoid: false,
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',
@@ -30,7 +30,7 @@ module.exports = class creatorProfit extends Sequelize.Model {
    }
 
    static associate(db) {
-      creatorProfit.belongsTo(db.Creator, {
+      CreatorProfit.belongsTo(db.Creator, {
          foreignKey: 'creatorId',
          targetKey: 'id',
          onDelete: 'CASCADE',

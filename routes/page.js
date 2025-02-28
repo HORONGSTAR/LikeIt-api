@@ -4,7 +4,7 @@ const { isLoggedIn } = require('./middlewares')
 const fs = require('fs')
 const multer = require('multer')
 const path = require('path')
-const { User, Creator, Category, Order, Project, Point } = require('../models')
+const { User, Creator, Category, Order, Project, Point, CreatorProfit, Reward } = require('../models')
 
 try {
    fs.readdirSync('uploads') //해당 폴더가 있는 지 확인
@@ -33,14 +33,23 @@ const upload = multer({
 router.get('/profile', isLoggedIn, async (req, res) => {
    try {
       const user = await User.findOne({ where: { id: req.user.id }, include: { model: Creator, include: Category } })
-      const userWithOrders = await User.findOne({ where: { id: req.user.id }, include: { model: Order, include: { model: Project } } })
+      const orders = await Order.findAll({ where: { userId: req.user.id }, include: { model: Reward, include: { model: Project } } })
       const points = await Point.findAll({ where: { userId: req.user.id } })
+      let profits
+      if (user.Creator) {
+         profits = await CreatorProfit.findAll({ where: { creatorId: user.Creator.id } })
+      } else {
+         profits = []
+      }
+      const allProjects = await Project.findAll()
 
       res.json({
          success: true,
          user: user,
-         userWithOrders: userWithOrders,
+         orders: orders,
          points: points,
+         profits: profits,
+         allProjects: allProjects,
          message: '프로필 정보를 성공적으로 가져왔습니다.',
       })
    } catch (error) {

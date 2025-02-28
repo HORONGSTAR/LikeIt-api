@@ -26,6 +26,7 @@ const StudioCommunityComment = require('./studioCommunityComment')
 const StudioCreator = require('./studioCreator')
 const User = require('./user')
 const UserAccount = require('./userAccount')
+const CronJobLog = require('./CronJobLog')
 
 const db = {}
 const sequelize = new Sequelize(config.database, config.username, config.password, config)
@@ -55,6 +56,7 @@ db.StudioCommunityComment = StudioCommunityComment
 db.StudioCreator = StudioCreator
 db.User = User
 db.UserAccount = UserAccount
+db.CronJobLog = CronJobLog
 
 Address.init(sequelize)
 BannerProject.init(sequelize)
@@ -80,6 +82,7 @@ StudioCommunityComment.init(sequelize)
 StudioCreator.init(sequelize)
 User.init(sequelize)
 UserAccount.init(sequelize)
+CronJobLog.init(sequelize)
 
 Address.associate(db)
 BannerProject.associate(db)
@@ -105,5 +108,6 @@ StudioCommunityComment.associate(db)
 StudioCreator.associate(db)
 User.associate(db)
 UserAccount.associate(db)
+CronJobLog.associate(db)
 
 module.exports = db
