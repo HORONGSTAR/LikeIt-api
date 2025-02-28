@@ -42,6 +42,9 @@ router.get('/', async (req, res) => {
                model: Order,
                attributes: [],
                required: false,
+               where: {
+                  orderPrice: { [Sequelize.Op.gt]: 0 },
+               },
             },
          ],
          group: ['User.id'],
@@ -61,6 +64,9 @@ router.get('/', async (req, res) => {
                model: Order,
                attributes: [],
                required: false,
+               where: {
+                  orderPrice: { [Sequelize.Op.gt]: 0 },
+               },
             },
          ],
          group: ['User.id'],
@@ -99,6 +105,7 @@ WITH RankedUsers AS (
       AND DirectReviews.deletedAt IS NULL
    LEFT JOIN Orders 
       ON Users.id = Orders.userId
+      AND Orders.orderPrice >= 0
    WHERE Users.deletedAt IS NULL
    GROUP BY Users.id
 )
