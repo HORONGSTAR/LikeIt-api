@@ -9,6 +9,15 @@ module.exports = class Message extends Sequelize.Model {
                type: Sequelize.STRING(500),
                allowNull: false,
             },
+            // 이미지 id
+            imgId: {
+               type: Sequelize.NUMBER,
+            },
+            // 이미지를 불러올 테이블 타입
+            imgType: {
+               type: Sequelize.ENUM('PROJECT', 'STUDIO', 'USER', 'REVIEW', 'NO_IMG'),
+               defaultValue: 'NO_IMG',
+            },
          },
          {
             sequelize,

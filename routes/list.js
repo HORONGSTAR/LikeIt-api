@@ -4,6 +4,7 @@ const fs = require('fs')
 
 const { Project, Order, Studio, User } = require('../models')
 const { Sequelize } = require('sequelize')
+const { isLoggedIn } = require('./middlewares')
 
 // uploads 폴더가 없을 경우 새로 생성
 try {
@@ -68,6 +69,9 @@ router.get('/:type', async (req, res) => {
                   model: Order,
                   attributes: [],
                   required: false,
+                  where: {
+                     orderPrice: { [Sequelize.Op.gt]: 0 },
+                  },
                },
                {
                   model: Studio,
@@ -96,6 +100,9 @@ router.get('/:type', async (req, res) => {
                   model: Order,
                   attributes: [],
                   required: false,
+                  where: {
+                     orderPrice: { [Sequelize.Op.gt]: 0 },
+                  },
                },
                {
                   model: Studio,
@@ -125,6 +132,9 @@ router.get('/:type', async (req, res) => {
                   model: Order,
                   attributes: [],
                   required: false,
+                  where: {
+                     orderPrice: { [Sequelize.Op.gt]: 0 },
+                  },
                },
                {
                   model: Studio,
@@ -253,7 +263,7 @@ router.get('/follow/:id', async (req, res) => {
 })
 
 // 공개예정 프로젝트 알림 신청
-router.post('/notice/reg/:id', async (req, res) => {
+router.post('/notice/reg/:id', isLoggedIn, async (req, res) => {
    try {
       const userId = req.user.id
       const projectId = req.params.id
@@ -274,7 +284,7 @@ router.post('/notice/reg/:id', async (req, res) => {
 })
 
 // 공개예정 프로젝트 알림 해제
-router.delete('/notice/del/:id', async (req, res) => {
+router.delete('/notice/del/:id', isLoggedIn, async (req, res) => {
    try {
       const userId = req.user.id
       const projectId = req.params.id
@@ -293,4 +303,5 @@ router.delete('/notice/del/:id', async (req, res) => {
       res.status(500).json({ success: false, message: '프로젝트 알림 상태를 변경하는데 문제가 발생했습니다.' })
    }
 })
+
 module.exports = router
