@@ -60,6 +60,9 @@ router.get('/:id', async (req, res) => {
                model: Order,
                attributes: [],
                required: false,
+               where: {
+                  orderPrice: { [Sequelize.Op.gt]: 0 },
+               },
             },
             {
                model: Reward,
@@ -343,6 +346,7 @@ router.post('/order', isLoggedIn, async (req, res) => {
    const transaction = await sequelize.transaction() // 트랜잭션 시작
    try {
       const userId = req.user.id
+      const createdAt = new Date()
       const { orderPrices, address, account, rewards, projectId, usePoint } = req.body
 
       const orderData = Object.entries(rewards).map(([rewardId, orderCount], index) => ({
@@ -353,6 +357,8 @@ router.post('/order', isLoggedIn, async (req, res) => {
          account,
          projectId,
          userId,
+         createdAt,
+         updatedAt: createdAt,
       }))
 
       // 1. 트랜잭션 내에서 각 rewardId의 stock을 체크
@@ -389,6 +395,8 @@ router.post('/order', isLoggedIn, async (req, res) => {
                account,
                projectId,
                userId,
+               createdAt,
+               updatedAt: createdAt,
             },
             { transaction }
          )
