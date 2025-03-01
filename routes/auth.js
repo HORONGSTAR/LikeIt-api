@@ -122,57 +122,55 @@ router.post('/login', isNotLoggedIn, async (req, res, next) => {
    })(req, res, next)
 })
 
-// 구글로그인 연동 시작버튼
+// 구글 연동 시작버튼
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }))
 
-//구글 최종 로그인
+//구글 연동 인증 과정
 router.get('/google/callback', isNotLoggedIn, (req, res, next) => {
-   passport.authenticate(
-      'google',
-      // { failureRedirect: '/' }, //원래는 이거였음 아랫걸로 바꿔줌
-      { failureRedirect: process.env.FRONTEND_APP_URL },
-      (authError, user, info) => {
-         if (authError) {
-            //로그인 인증 중 에러 발생시
-            return res.status(500).json({
-               success: false,
-               message: '인증 중 오류 발생',
-               error: authError,
-            })
-         }
-         if (!user) {
-            req.session.tempThings = info.tempThings
-            return res.redirect(info.redirect) // Redirect to additional info page
-         }
-         req.login(user, (loginError) => {
-            if (loginError) {
-               // 로그인 상태로 바꾸는 중 오류 발생시
-               return res.status(500).json({
-                  success: false,
-                  message: '로그인 중 오류 발생',
-                  error: loginError,
-               })
-            }
+   passport.authenticate('google', { failureRedirect: process.env.FRONTEND_APP_URL }, (authError, user, info) => {
+      if (authError) {
+         // 인증 중 에러 발생시
 
-            //로그인 성공시
-            //status code를 주지 않으면 기본값은 200
-            res.json({
-               success: true,
-               message: '로그인 성공',
-               user: {
-                  id: user.id,
-                  nick: user.nick,
-               },
-            })
+         return res.status(500).json({
+            success: false,
+            message: '인증 중 오류 발생',
+            error: authError,
          })
       }
-   )(req, res, next)
+      if (!user) {
+         console.log('info:', info)
+         req.session.tempThings = info.tempThings
+         return res.redirect(info.redirect) // Redirect to additional info page
+      }
+      req.login(user, (loginError) => {
+         if (loginError) {
+            // 로그인 상태로 바꾸는 중 오류 발생시
+            return res.status(500).json({
+               success: false,
+               message: '로그인 중 오류 발생',
+               error: loginError,
+            })
+         }
+
+         //로그인 성공시
+         //status code를 주지 않으면 기본값은 200
+         res.json({
+            success: true,
+            message: '로그인 성공',
+            user: {
+               id: user.id,
+               nick: user.nick,
+            },
+         })
+      })
+   })(req, res, next)
 })
 
 //구글 어카운트가 없을경우의 user랑 account 모두 생성
 //전화번호를 확인하고 commonsignup만 돼있는 회원인지 아니면 googlelogin으로도 되어있는 회원인지에 따라서 코드가 달라져야 함.
 router.post('/googlejoin', isNotLoggedIn, async (req, res, next) => {
    const { phone } = req.body
+   console.log('req.session:', req.session)
    try {
       const exUser = await User.findOne({
          where: {
@@ -196,7 +194,6 @@ router.post('/googlejoin', isNotLoggedIn, async (req, res, next) => {
          accountType: req.session.tempThings.tempUserAccount.accountType,
       })
       const newUser = await User.create({
-         email: req.session.tempThings.tempUser.email,
          name: req.session.tempThings.tempUser.name,
          phone: phone,
          role: 'USER',
@@ -311,12 +308,7 @@ router.post('/setpassword', async (req, res, next) => {
          const allChars = upper + lower + digits + special
 
          // Ensure at least one of each category
-         let password = [
-            upper[Math.floor(Math.random() * upper.length)],
-            lower[Math.floor(Math.random() * lower.length)],
-            digits[Math.floor(Math.random() * digits.length)],
-            special[Math.floor(Math.random() * special.length)],
-         ]
+         let password = [upper[Math.floor(Math.random() * upper.length)], lower[Math.floor(Math.random() * lower.length)], digits[Math.floor(Math.random() * digits.length)], special[Math.floor(Math.random() * special.length)]]
 
          // Fill the remaining length
          for (let i = password.length; i < length; i++) {

@@ -7,13 +7,13 @@ module.exports = class User extends Sequelize.Model {
             // 이메일
             email: {
                type: Sequelize.STRING(100),
-               allowNull: false,
+               allowNull: true,
                unique: true,
             },
             // 비밀번호
             password: {
                type: Sequelize.STRING(100),
-               allowNull: false,
+               allowNull: true,
             },
             // 닉네임
             name: {
