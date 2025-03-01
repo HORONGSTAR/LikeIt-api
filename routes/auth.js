@@ -214,6 +214,22 @@ router.post('/googlejoin', isNotLoggedIn, async (req, res, next) => {
    }
 })
 
+router.get('/kakao', passport.authenticate('kakao'))
+
+router.get('/kakao/callback', isNotLoggedIn, (req, res, next) => {
+   passport.authenticate('kakao', { failureRedirect: process.env.FRONTEND_APP_URL }, (authError, user, info) => {
+      if (authError) {
+         return res.status(500).json({
+            success: false,
+            message: '인증 중 오류 발생',
+            error: authError,
+         })
+      }
+      if (!user) {
+      }
+   })
+})
+
 //로그아웃 localhost:8000/auth/logout
 router.get('/logout', isLoggedIn, async (req, res, next) => {
    //사용자를 로그아웃 상태로 바꿈
