@@ -32,7 +32,6 @@ const messageRouter = require('./routes/message')
 
 const app = express()
 passportConfig() // passport 실행
-cronJobs() // cron 실행
 app.set('port', process.env.PORT || 8002)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
@@ -46,6 +45,7 @@ sequelize
       console.error(err)
    }) // 연결 실패시
 
+// cronJobs() // cron 실행
 // 미들웨어 설정
 app.use(
    cors({
@@ -97,7 +97,6 @@ const server = http.createServer(app)
 
 // Socket.IO 초기화 및 서버와 연결
 socketIO(server, sessionMiddleware)
-
 
 // 잘못된 라우터 경로 처리
 app.use((req, res, next) => {

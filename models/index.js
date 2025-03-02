@@ -26,7 +26,7 @@ const StudioCommunityComment = require('./studioCommunityComment')
 const StudioCreator = require('./studioCreator')
 const User = require('./user')
 const UserAccount = require('./userAccount')
-const CronJobLog = require('./CronJobLog')
+const CronJobLog = require('./cronJobLog')
 
 const db = {}
 const sequelize = new Sequelize(config.database, config.username, config.password, config)

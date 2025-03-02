@@ -31,7 +31,7 @@ module.exports = class CronJobLog extends Sequelize.Model {
             paranoid: true,
             underscored: false,
             modelName: 'CronJobLog',
-            tableName: 'CronJobLogs',
+            tableName: 'cronJobLogs',
             charset: 'utf8mb4',
             collate: 'utf8mb4_general_ci',
          }

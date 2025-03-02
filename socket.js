@@ -2,7 +2,6 @@ const { Server } = require('socket.io')
 const passport = require('passport')
 
 module.exports = (server, sessionMiddleware) => {
-   // Socket.IO 서버 생성
    const io = new Server(server, {
       cors: {
          origin: process.env.FRONTEND_APP_URL,
@@ -10,6 +9,9 @@ module.exports = (server, sessionMiddleware) => {
          credentials: true,
       },
    })
+
+   const spaceRoom = {}
+   const today = new Date()
 
    io.use((socket, next) => {
       sessionMiddleware(socket.request, {}, next)
@@ -23,68 +25,98 @@ module.exports = (server, sessionMiddleware) => {
             next()
          })
       } else {
-         console.log('비인증 사용자 연결 시도')
          return socket.disconnect()
       }
    })
 
-   const spaceRoom = {}
-   const today = new Date()
-
    io.on('connection', (socket) => {
       const user = socket.request.user
       const rooms = io.sockets.adapter.rooms
+      console.log(`${user.id}번 유저 서버 연결.`)
 
-      console.log('사용자 연결됨: ', user?.id)
+      socket.emit('active server', '소켓 서버 활성화.')
+
+      socket.on('space info', (studioId) => {
+         const room = spaceRoom[studioId]
+         if (room) {
+            socket.emit('space info', room)
+            console.log(`${studioId}번 스페이스 정보 요청.`)
+         } else {
+            socket.emit('space info', null)
+            console.log(`${studioId}번 스페이스 정보 없음.`)
+         }
+      })
 
       socket.on('start space', (studioId) => {
          if (!spaceRoom[studioId]) {
+            socket.join(studioId)
             spaceRoom[studioId] = {
-               admin: { name: user?.name, imgUrl: user?.imgUrl, startTime: today },
-               watchers: [],
+               admin: { id: user.id, name: user.name, imgUrl: user.imgUrl },
+               socketId: { [user.id]: socket.id },
+               startTime: today,
             }
-            console.log(studioId, '번 스튜디오 스페이스 시작')
+            socket.emit('space info', spaceRoom[studioId])
+            console.log(`${studioId}번 스페이스 시작.`)
          } else {
-            console.log(studioId, '번 스튜디오에서 이미 스페이스를 진행하고 있습니다.')
+            console.log(`${studioId}번 스페이스 진행 중.`)
          }
       })
 
       socket.on('join space', (studioId) => {
          if (spaceRoom[studioId]) {
             socket.join(studioId)
-            spaceRoom[studioId].watchers.push(user?.id)
-            socket.emit('space info', spaceRoom[studioId])
-            console.log(studioId, '번 스튜디오 스페이스에 참여합니다.')
-         } else {
-            console.log('참여할 수 있는 스페이스가 없습니다.')
+            spaceRoom[studioId].socketId[user.id] = socket.id
+            io.to(studioId).emit('user info', {
+               id: user.id,
+               name: user.name,
+               imgUrl: user.imgUrl,
+            })
+            console.log(`${studioId}번 스페이스에 ${user.id}번 유저 입장.`)
          }
+      })
+
+      socket.on('offer', (offer, studioId) => {
+         io.to(studioId).emit('offer', offer, user.id)
+         console.log('offer:', rooms)
+      })
+
+      socket.on('answer', (answer, adminId) => {
+         spaceRoom[studioId].socketId[adminId].emit('answer', answer)
+         console.log('answer : ', spaceRoom[studioId].socketId[adminId])
+      })
+
+      socket.on('candidate', (candidate, studioId) => {
+         io.to(studioId).emit('candidate', candidate, socket.id)
+         console.log('candidate : ', candidate)
       })
 
       socket.on('chat message', (studioId, msg) => {
          if (studioId && msg) {
-            io.to(studioId).emit('chat message', { name: user?.name, message: msg, imgUrl: user?.imgUrl })
-         } else {
-            console.log('메세지를 확인할 수 없습니다.')
+            io.to(studioId).emit('chat message', { name: user.name, message: msg, imgUrl: user.imgUrl })
+            console.log('chat message : ', msg, studioId)
+            console.log('rooms: ', rooms)
+            console.log(spaceRoom)
          }
       })
 
       socket.on('leave space', (studioId) => {
-         socket.leave(studioId)
          if (spaceRoom[studioId]) {
-            spaceRoom[studioId].users = spaceRoom[studioId].watchers.filter((watcher) => watcher !== user.id)
-            if (spaceRoom[studioId].watchers.length === 0) {
-               delete spaceRoom[studioId]
-            }
+            socket.leave(studioId)
+            delete spaceRoom[studioId].socketId[user.id]
+            console.log(`${studioId}번 스페이스의 ${user.id}번 유저 퇴장.`)
          }
       })
 
       socket.on('end space', (studioId) => {
-         io.socketsLeave(studioId)
-         delete spaceRoom[studioId]
+         if (spaceRoom[studioId].admin.id === user?.id) {
+            socket.leave(studioId)
+            delete spaceRoom[studioId]
+            console.log(`${studioId}번 스페이스 종료.`)
+         }
       })
 
-      socket.on('disconnect', () => {
-         console.log('사용자 연결 해제:', user?.id)
+      socket.on('disconnect', (studioId) => {
+         console.log(`${user.id}번 유저 연결 해제.`)
          return socket.disconnect()
       })
    })
