@@ -29,11 +29,9 @@ module.exports = () => {
                   })
                   done(null, exUser, {
                      message: '가입된 회원.',
-                     tempThings: {},
-                     redirect: 'http://localhost:3000/additionalsignup',
                   }) // 로그인 인증 완료
                } else {
-                  // 가입되지 않는 유저면
+                  // 가입되지 않는 유저면 가입과정은 auth.js에 있으니 그쪽으로 정보 보내기
                   const tempUserAccount = {
                      profileId: profile.id,
                      accountEmail: profile?.emails[0].value,

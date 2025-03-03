@@ -64,12 +64,8 @@ router.put('/profile', isLoggedIn, upload.single('img'), async (req, res) => {
       console.log('파일정보:', req.file)
       console.log('req.body:', req.body)
 
-      if (!req.file) {
-         return res.status(400).json({ success: false, message: '파일 업로드에 실패했습니다.' })
-      }
-
       const exUser = await User.findOne({ where: { name: req.body.name } })
-      if (!exUser) {
+      if (exUser) {
          return res.status(409).json({ success: false, message: '동일한 닉네임을 가진 사용자가 있습니다.' })
       }
 

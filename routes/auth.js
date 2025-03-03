@@ -28,15 +28,6 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
          })
       }
 
-      //폰번호 중복 확인
-      const exPhoneUser = await User.findOne({ where: { phone } })
-      if (exPhoneUser) {
-         return res.status(409).json({
-            success: false,
-            message: '동일한 전화번호로 가입한 사용자가 있습니다.',
-         })
-      }
-
       //이름 중복 확인
       const exNicknameUser = await User.findOne({ where: { name: nickname } })
       if (exNicknameUser) {
@@ -47,20 +38,42 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
       }
 
       const hash = await bcrypt.hash(password, 12)
-      const newUser = await User.create({
-         email: email,
-         phone: phone,
-         name: nickname,
-         password: hash,
-         role: 'USER',
-         imgUrl: '/default_profile.png',
-      })
+
+      //폰번호 중복 확인
+      const exPhoneUser = await User.findOne({ where: { phone } })
+
+      let newUser
+
+      if (exPhoneUser) {
+         if (exPhoneUser.password) {
+            return res.status(409).json({
+               success: false,
+               message: '동일한 전화번호로 가입한 사용자가 있습니다.',
+            })
+         } else {
+            //user정보 update
+            newUser = await exPhoneUser.update({
+               email: email,
+               name: nickname,
+               password: hash,
+            })
+         }
+      } else {
+         newUser = await User.create({
+            email: email,
+            phone: phone,
+            name: nickname,
+            password: hash,
+            role: 'USER',
+         })
+      }
 
       // 위 코드 findOrCreate하면 줄일수 있는지 여쭤보고 성능에도 영향 미치는지 여쭤보기.
 
       res.status(201).json({
          success: true,
          message: '사용자가 성공적으로 등록되었습니다.',
+         isSignupComplete: true,
          newUser,
       })
    } catch (error) {
@@ -138,7 +151,6 @@ router.get('/google/callback', isNotLoggedIn, (req, res, next) => {
          })
       }
       if (!user) {
-         console.log('info:', info)
          req.session.tempThings = info.tempThings
          return res.redirect(info.redirect) // Redirect to additional info page
       }
@@ -154,68 +166,23 @@ router.get('/google/callback', isNotLoggedIn, (req, res, next) => {
 
          //로그인 성공시
          //status code를 주지 않으면 기본값은 200
-         res.json({
-            success: true,
-            message: '로그인 성공',
-            user: {
-               id: user.id,
-               nick: user.nick,
-            },
-         })
+         // res.json({
+         //    success: true,
+         //    message: '로그인 성공',
+         //    user: {
+         //       id: user.id,
+         //       name: user.name,
+         //    },
+         // })
+         res.redirect('http://localhost:3000/')
       })
    })(req, res, next)
 })
 
-//구글 어카운트가 없을경우의 user랑 account 모두 생성
-//전화번호를 확인하고 commonsignup만 돼있는 회원인지 아니면 googlelogin으로도 되어있는 회원인지에 따라서 코드가 달라져야 함.
-router.post('/googlejoin', isNotLoggedIn, async (req, res, next) => {
-   const { phone } = req.body
-   console.log('req.session:', req.session)
-   try {
-      const exUser = await User.findOne({
-         where: {
-            phone: phone,
-         },
-      })
-      if (exUser) {
-         return res.status(409).json({
-            success: false,
-            message: '동일한 전화번호로 중복가입은 불가능합니다.',
-         })
-      }
-      //동일한 전화번호로 가입한 사람이 없다면 newUser, newUserAccount 생성
-
-      // console.log(req.session)
-      // console.log('어카운트이메일:', req.session.tempThings.tempUserAccount.accountEmail)
-
-      const newUserAccount = await UserAccount.create({
-         accountEmail: req.session.tempThings.tempUserAccount.accountEmail,
-         profileId: req.session.tempThings.tempUserAccount.profileId,
-         accountType: req.session.tempThings.tempUserAccount.accountType,
-      })
-      const newUser = await User.create({
-         name: req.session.tempThings.tempUser.name,
-         phone: phone,
-         role: 'USER',
-      })
-
-      res.status(201).json({
-         success: true,
-         message: '사용자(구글연동)가 성공적으로 등록되었습니다.',
-         newUser,
-      })
-   } catch (error) {
-      console.error(error)
-      res.status(500).json({
-         success: false,
-         message: '회원가입중 오류가 발생했습니다.',
-         error,
-      })
-   }
-})
-
+//카카오 연동 시작 버튼
 router.get('/kakao', passport.authenticate('kakao'))
 
+//카카오 연동 인증 과정
 router.get('/kakao/callback', isNotLoggedIn, (req, res, next) => {
    passport.authenticate('kakao', { failureRedirect: process.env.FRONTEND_APP_URL }, (authError, user, info) => {
       if (authError) {
@@ -226,8 +193,79 @@ router.get('/kakao/callback', isNotLoggedIn, (req, res, next) => {
          })
       }
       if (!user) {
+         req.session.tempThings = info.tempThings
+         return res.redirect(info.redirect) // Redirect to additional info page
       }
-   })
+      req.login(user, (loginError) => {
+         if (loginError) {
+            // 로그인 상태로 바꾸는 중 오류 발생시
+            return res.status(500).json({
+               success: false,
+               message: '로그인 중 오류 발생',
+               error: loginError,
+            })
+         }
+
+         //로그인 성공시
+         //status code를 주지 않으면 기본값은 200
+         // res.json({
+         //    success: true,
+         //    message: '로그인 성공',
+         //    user: {
+         //       id: user.id,
+         //       name: user.name,
+         //    },
+         // })
+         res.redirect('http://localhost:3000/')
+      })
+   })(req, res, next)
+})
+
+router.post('/snsjoin', isNotLoggedIn, async (req, res, next) => {
+   try {
+      const { phone } = req.body
+      const exUser = await User.findOne({
+         where: {
+            phone: phone,
+         },
+      })
+
+      if (exUser) {
+         //exUserAccount는 없고 exUser는 있는 상태
+         await UserAccount.create({
+            accountEmail: req.session.tempThings.tempUserAccount.accountEmail,
+            profileId: req.session.tempThings.tempUserAccount.profileId,
+            accountType: req.session.tempThings.tempUserAccount.accountType,
+            userId: exUser.id,
+         })
+      } else {
+         const newUser = await User.create({
+            email: req.session.tempThings.tempUserAccount.accountEmail,
+            name: req.session.tempThings.tempUser.name,
+            phone: phone,
+            role: 'USER',
+         })
+         await UserAccount.create({
+            accountEmail: req.session.tempThings.tempUserAccount.accountEmail,
+            profileId: req.session.tempThings.tempUserAccount.profileId,
+            accountType: req.session.tempThings.tempUserAccount.accountType,
+            userId: newUser.id,
+         })
+      }
+
+      res.status(201).json({
+         success: true,
+         isSignupComplete: true,
+         message: '사용자(소셜계정연동)가 성공적으로 등록되었습니다.',
+      })
+   } catch (error) {
+      console.error(error)
+      res.status(500).json({
+         success: false,
+         message: '회원가입중 오류가 발생했습니다.',
+         error,
+      })
+   }
 })
 
 //로그아웃 localhost:8000/auth/logout
@@ -292,7 +330,14 @@ router.post('/setpassword', async (req, res, next) => {
          //사용자가 없을 경우 info.message를 사용해서 메세지 전달
          return res.status(401).json({
             success: false,
-            message: info.message || '해당 이메일의 회원이 없습니다.',
+            message: '해당 이메일의 회원이 없습니다.',
+         })
+      }
+
+      if (!correspondingUser.password) {
+         return res.status(401).json({
+            success: false,
+            message: '해당 이메일의 회원이 없습니다.',
          })
       }
 
