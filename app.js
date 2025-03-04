@@ -46,6 +46,7 @@ sequelize
       console.error(err)
    }) // 연결 실패시
 
+// cronJobs() // cron 실행
 // 미들웨어 설정
 app.use(
    cors({

@@ -41,7 +41,15 @@ module.exports = class Order extends Sequelize.Model {
             },
             // 주문상황 (펀딩진행중, 펀딩성공/결제완료, 펀딩성공/결제실패, 펀딩실패, 전달준비중, 전달시작, 전달완료)
             orderStatus: {
-               type: Sequelize.ENUM('ON_FUNDING', 'FUNDING_COMPLETE_PAID', 'FUNDING_COMPLETE_NOT_PAID', 'FUNDING_FAILED', 'DELIVERY_WAITING', 'DELIVERY_STARTED', 'DELIVERY_COMPLETE'),
+               type: Sequelize.ENUM(
+                  'ON_FUNDING',
+                  'FUNDING_COMPLETE_PAID',
+                  'FUNDING_COMPLETE_NOT_PAID',
+                  'FUNDING_FAILED',
+                  'DELIVERY_WAITING',
+                  'DELIVERY_STARTED',
+                  'DELIVERY_COMPLETE'
+               ),
                defaultValue: 'ON_FUNDING',
             },
          },

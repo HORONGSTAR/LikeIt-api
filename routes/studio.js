@@ -86,7 +86,7 @@ router.post('/', isCreator, upload.single('image'), async (req, res) => {
    try {
       const { name, intro, account } = req.body
       const creatorId = req.user.Creator.id
-      const imgUrl = req.file ? `/uploads/studioImg/${req.file.filename}` : null
+      const imgUrl = req.file ? `/${req.file.filename}` : null
 
       const newStudio = await Studio.create({
          name,
@@ -139,7 +139,7 @@ router.put('/:id', isCreator, upload.single('image'), async (req, res) => {
       await studio.update({
          name,
          intro,
-         imgUrl: req.file ? `/uploads/studioImg/${req.file.filename}` : studio.imgUrl,
+         imgUrl: req.file ? `/${req.file.filename}` : studio.imgUrl,
       })
 
       const { snsLinks, removeSns } = JSON.parse(account)
