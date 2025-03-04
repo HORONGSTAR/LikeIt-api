@@ -1,6 +1,7 @@
 const passport = require('passport')
 const local = require('./localStrategy')
 const google = require('./googleStrategy')
+const kakao = require('./kakaoStrategy')
 const { User, Creator, StudioCreator, UserAccount } = require('../models')
 
 module.exports = () => {
@@ -39,4 +40,5 @@ module.exports = () => {
 
    local() //localStrategy.js 파일의 함수를 실행해 Passport에 local을 추가
    google()
+   kakao()
 }

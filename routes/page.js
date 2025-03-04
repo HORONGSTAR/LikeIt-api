@@ -33,7 +33,7 @@ const upload = multer({
 router.get('/profile', isLoggedIn, async (req, res) => {
    try {
       const user = await User.findOne({ where: { id: req.user.id }, include: { model: Creator, include: Category } })
-      const orders = await Order.findAll({ where: { userId: req.user.id }, include: { model: Reward, include: { model: Project } } })
+      const orders = await Order.findAll({ where: { userId: req.user.id }, include: [{ model: Reward }, { model: Project }] })
       const points = await Point.findAll({ where: { userId: req.user.id } })
       let profits
       if (user.Creator) {
@@ -64,8 +64,9 @@ router.put('/profile', isLoggedIn, upload.single('img'), async (req, res) => {
       console.log('파일정보:', req.file)
       console.log('req.body:', req.body)
 
-      if (!req.file) {
-         return res.status(400).json({ success: false, message: '파일 업로드에 실패했습니다.' })
+      const exUser = await User.findOne({ where: { name: req.body.name } })
+      if (exUser) {
+         return res.status(409).json({ success: false, message: '동일한 닉네임을 가진 사용자가 있습니다.' })
       }
 
       //게시물 생성

@@ -27,16 +27,18 @@ module.exports = () => {
                   const exUser = await User.findOne({
                      where: { id: exUserAccount.userId },
                   })
-                  done(null, exUser) // 로그인 인증 완료
+                  done(null, exUser, {
+                     message: '가입된 회원.',
+                  }) // 로그인 인증 완료
                } else {
-                  // 가입되지 않는 유저면
+                  // 가입되지 않는 유저면 가입과정은 auth.js에 있으니 그쪽으로 정보 보내기
                   const tempUserAccount = {
                      profileId: profile.id,
                      accountEmail: profile?.emails[0].value,
                      accountType: 'GOOGLE',
                   }
                   const tempUser = {
-                     email: profile?.emails[0].value, //이게 뭐지??
+                     email: profile?.emails[0].value,
                      name: profile.displayName,
                   }
 

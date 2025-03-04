@@ -15,6 +15,9 @@ module.exports = () => {
          //실제 인증 로직
          async (email, password, done) => {
             try {
+               if (!password) {
+                  throw new Error('비밀번호를 입력하세요.')
+               }
                // 이메일로 사용자 조회
                // select * from users where email = ?
                const exUser = await User.findOne({

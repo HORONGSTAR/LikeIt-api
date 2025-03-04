@@ -11,7 +11,7 @@ module.exports = class Message extends Sequelize.Model {
             },
             // 이미지 id
             imgId: {
-               type: Sequelize.NUMBER,
+               type: Sequelize.INTEGER,
             },
             // 이미지를 불러올 테이블 타입
             imgType: {
