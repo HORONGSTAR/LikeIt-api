@@ -31,7 +31,6 @@ module.exports = (server, sessionMiddleware) => {
 
    io.on('connection', (socket) => {
       const user = socket.request.user
-      const rooms = io.sockets.adapter.rooms
       console.log(`${user.id}번 유저 서버 연결.`)
 
       socket.on('space info', (studioId) => {
@@ -48,7 +47,6 @@ module.exports = (server, sessionMiddleware) => {
                socketId: { [user.id]: socket.id },
                startTime: today,
             }
-
             socket.emit('space info', studio[studioId])
          }
       })
@@ -63,18 +61,16 @@ module.exports = (server, sessionMiddleware) => {
             })
             const adminId = studio[studioId].admin.id
             const broadcasterId = studio[studioId].socketId[adminId]
-            console.log(broadcasterId)
             io.to(broadcasterId).emit('new listener', socket.id)
-            console.log('new listener')
          }
       })
 
-      socket.on('offer', ({ studioId, offer, listenerId }) => {
+      socket.on('offer', ({ offer, listenerId }) => {
          io.to(listenerId).emit('offer', { offer, broadcasterId: socket.id })
          console.log('offer')
       })
 
-      socket.on('answer', ({ studioId, answer, broadcasterId }) => {
+      socket.on('answer', ({ answer, broadcasterId }) => {
          io.to(broadcasterId).emit('answer', { answer, listenerId: socket.id })
          console.log('answer')
       })
