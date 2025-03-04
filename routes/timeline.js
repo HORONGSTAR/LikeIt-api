@@ -18,7 +18,7 @@ try {
 const upload = multer({
    storage: multer.diskStorage({
       destination(req, file, cb) {
-         cb(null, 'uploads/timelineImg')
+         cb(null, 'uploads/timelineImg/')
       },
       filename(req, file, cb) {
          const decodedFileName = decodeURIComponent(file.originalname)
@@ -34,7 +34,7 @@ const upload = multer({
 router.post('/create', isLoggedIn, upload.single('image'), async (req, res) => {
    try {
       const { projectId, title, contents } = req.body
-      const imgUrl = req.file ? `/uploads/timelineImg/${req.file.filename}` : null
+      const imgUrl = req.file ? `${req.file.filename}` : null
 
       const existingTimeline = await ProjectTimeline.findOne({ where: { title, projectId } })
 
