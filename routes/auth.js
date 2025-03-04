@@ -12,7 +12,7 @@ const { promisify } = require('util')
 //일반회원가입 localhost:8000/auth/join
 router.post('/join', isNotLoggedIn, async (req, res, next) => {
    const { email, phone, nickname, password } = req.body
-   //이메일 중복 확인
+
    try {
       if (!email || !phone || !nickname || !password) {
          return res.status(404).json({
@@ -20,23 +20,6 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
             message: '모든 입력란을 입력해주세요.',
          })
       }
-      const exEmailUser = await User.findOne({ where: { email } })
-      if (exEmailUser) {
-         return res.status(409).json({
-            success: false,
-            message: '동일한 이메일로 가입한 사용자가 있습니다.',
-         })
-      }
-
-      //이름 중복 확인
-      const exNicknameUser = await User.findOne({ where: { name: nickname } })
-      if (exNicknameUser) {
-         return res.status(409).json({
-            success: false,
-            message: '동일한 닉네임으로 가입한 사용자가 있습니다.',
-         })
-      }
-
       const hash = await bcrypt.hash(password, 12)
 
       //폰번호 중복 확인
@@ -48,7 +31,7 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
          if (exPhoneUser.password) {
             return res.status(409).json({
                success: false,
-               message: '동일한 전화번호로 가입한 사용자가 있습니다.',
+               message: '동일한 정보로 가입한 사용자가 있습니다.',
             })
          } else {
             //user정보 update
@@ -59,7 +42,25 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
             })
          }
       } else {
+         const exEmailUser = await User.findOne({ where: { email } })
+         if (exEmailUser) {
+            return res.status(409).json({
+               success: false,
+               message: '동일한 이메일로 가입한 사용자가 있습니다.',
+            })
+         }
+
+         //이름 중복 확인
+         const exNicknameUser = await User.findOne({ where: { name: nickname } })
+         if (exNicknameUser) {
+            return res.status(409).json({
+               success: false,
+               message: '동일한 닉네임으로 가입한 사용자가 있습니다.',
+            })
+         }
+
          newUser = await User.create({
+            isSignupComplete: true,
             email: email,
             phone: phone,
             name: nickname,
@@ -67,8 +68,6 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
             role: 'USER',
          })
       }
-
-      // 위 코드 findOrCreate하면 줄일수 있는지 여쭤보고 성능에도 영향 미치는지 여쭤보기.
 
       res.status(201).json({
          success: true,
@@ -174,7 +173,7 @@ router.get('/google/callback', isNotLoggedIn, (req, res, next) => {
          //       name: user.name,
          //    },
          // })
-         res.redirect('http://localhost:3000/')
+         res.redirect(`${process.env.FRONTEND_APP_URL}`)
       })
    })(req, res, next)
 })
@@ -216,7 +215,7 @@ router.get('/kakao/callback', isNotLoggedIn, (req, res, next) => {
          //       name: user.name,
          //    },
          // })
-         res.redirect('http://localhost:3000/')
+         res.redirect(`${process.env.FRONTEND_APP_URL}`)
       })
    })(req, res, next)
 })

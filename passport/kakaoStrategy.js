@@ -40,7 +40,7 @@ module.exports = () => {
                   done(null, false, {
                      message: '가입되지 않은 회원입니다.',
                      tempThings: { tempUserAccount, tempUser },
-                     redirect: 'http://localhost:3000/additionalsignup',
+                     redirect: `${process.env.FRONTEND_APP_URL}/additionalsignup`,
                   })
                }
             } catch (error) {
