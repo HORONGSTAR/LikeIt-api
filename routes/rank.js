@@ -88,10 +88,10 @@ WITH RankedUsers AS (
    SELECT 
       Users.id,
       COUNT(DISTINCT DirectReviews.id) AS reviewCount,
-      COUNT(DISTINCT Orders.id) AS orderCount,
+      COUNT(DISTINCT Orders.createdAt) AS orderCount,
       SUM(Orders.orderPrice) AS priceSum,
       RANK() OVER (ORDER BY COUNT(DISTINCT DirectReviews.id) DESC) AS reviewRank,
-      RANK() OVER (ORDER BY COUNT(DISTINCT Orders.id) DESC) AS orderRank,
+      RANK() OVER (ORDER BY COUNT(DISTINCT Orders.createdAt) DESC) AS orderRank,
       RANK() OVER (ORDER BY SUM(Orders.orderPrice) DESC) AS priceRank
    FROM Users
    LEFT JOIN ProjectReviews AS DirectReviews
