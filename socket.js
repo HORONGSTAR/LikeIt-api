@@ -43,8 +43,8 @@ module.exports = (server, sessionMiddleware) => {
          if (!studio[studioId]) {
             const { id, name, imgUrl } = user
             studio[studioId] = {
-               admin: { id, name, imgUrl },
-               socketId: { [user.id]: socket.id },
+               admin: { id, name, imgUrl, socketId: socket.id },
+               users: {},
                startTime: today,
             }
             socket.emit('space info', studio[studioId])
@@ -53,54 +53,43 @@ module.exports = (server, sessionMiddleware) => {
 
       socket.on('join space', (studioId) => {
          if (studio[studioId]) {
+            const { id, name, imgUrl } = user
             socket.join(studioId)
-            studio[studioId].socketId[user.id] = socket.id
-            io.to(studioId).emit('user info', {
-               name: user.name,
-               imgUrl: user.imgUrl,
-            })
-            const adminId = studio[studioId].admin.id
-            const broadcasterId = studio[studioId].socketId[adminId]
+            studio[studioId].users[id] = { name, imgUrl }
+            const broadcasterId = studio[studioId].admin.socketId
             io.to(broadcasterId).emit('new listener', socket.id)
          }
       })
 
       socket.on('offer', ({ offer, listenerId }) => {
          io.to(listenerId).emit('offer', { offer, broadcasterId: socket.id })
-         console.log('offer')
       })
 
       socket.on('answer', ({ answer, broadcasterId }) => {
          io.to(broadcasterId).emit('answer', { answer, listenerId: socket.id })
-         console.log('answer')
       })
 
       socket.on('ice-candidate', ({ targetId, candidate }) => {
          io.to(targetId).emit('ice-candidate', { candidate })
-         console.log('ice-candidate')
       })
 
       socket.on('chat message', (msg, studioId) => {
          if (msg) {
             const { name, imgUrl } = user
             io.to(studioId).emit('send message', { name, imgUrl, message: msg })
-         } else {
-            console.log('메세지 전송 실패')
          }
       })
 
       socket.on('leave space', (studioId) => {
          if (studio[studioId]) {
             socket.leave(studioId)
-            console.log('leave space')
-            delete studio[studioId].socketId[user.id]
+            delete studio[studioId].users[user?.id]
          }
       })
 
       socket.on('end space', (studioId) => {
          if (studio[studioId]?.admin?.id === user?.id) {
             socket.leave(studioId)
-            console.log('end space')
             delete studio[studioId]
          }
       })
