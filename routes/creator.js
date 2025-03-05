@@ -57,13 +57,11 @@ router.post('/', async (req, res) => {
       if (!user) {
          return res.status(404).json({ success: false, message: '해당 이름을 가진 유저가 존재하지 않습니다.' })
       }
-      console.log('찾은 userId:', user.id)
 
       const creator = await Creator.findOne({ where: { userId: user.id } })
       if (!creator) {
          return res.status(404).json({ success: false, message: '해당 유저는 창작자로 등록되지 않았습니다.' })
       }
-      console.log('찾은 creatorId:', creator.id)
 
       const existingCreator = await StudioCreator.findOne({ where: { creatorId: creator.id, studioId } })
       if (existingCreator) {

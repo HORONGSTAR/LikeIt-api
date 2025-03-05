@@ -55,9 +55,6 @@ router.get('/:id', async (req, res) => {
       const rewardProductsResult = project.Rewards.map((reward) => reward.RewardProducts)
       const rewardProducts = rewardProductsResult.flatMap((group) => group.map((product) => product))
 
-      console.log(rewardProductsResult)
-      console.log(rewardProducts)
-
       res.json({
          success: true,
          message: '프로젝트 조회 성공',

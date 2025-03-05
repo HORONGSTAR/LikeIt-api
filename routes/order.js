@@ -28,7 +28,6 @@ router.post('/upload-tracking', isCreator, upload.single('file'), async (req, re
 
       for (const row of jsonData) {
          const { 주문ID, 택배사, 운송장번호 } = row
-         console.log('엑셀에서 읽은 데이터:', 주문ID, 택배사, 운송장번호) // 디버깅용
 
          if (!주문ID || !택배사 || !운송장번호) continue
 

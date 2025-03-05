@@ -13,9 +13,6 @@ module.exports = () => {
             callbackURL: '/auth/google/callback',
          },
          async (accessToken, refreshToken, profile, done) => {
-            // Handle user profile here (e.g., save to database)
-            console.log('google profile : ', profile)
-            console.log('엑세스토큰:', accessToken)
             try {
                const exUserAccount = await UserAccount.findOne({
                   // 구글 플랫폼에서 로그인 했고 & profileId필드에 구글 아이디가 일치할경우

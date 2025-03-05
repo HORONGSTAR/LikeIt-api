@@ -92,8 +92,6 @@ router.put('/category', isLoggedIn, async (req, res) => {
          return res.status(400).json({ error: '카테고리가 변경되지 않았습니다.' })
       }
 
-      console.log('selectedCategories:', selectedCategories)
-
       let creator = await Creator.findOne({ where: { userId: req.user.id } })
 
       if (!creator) {

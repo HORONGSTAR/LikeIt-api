@@ -251,8 +251,6 @@ router.get('/logout', isLoggedIn, async (req, res, next) => {
    //사용자를 로그아웃 상태로 바꿈
    req.logout((err) => {
       if (err) {
-         //로그아웃 상태로 바꾸는 중 에러가 났을 때
-         console.log(err)
          return res.status(500).json({
             success: false,
             message: '로그아웃 중 오류가 발생했습니다.',
@@ -379,7 +377,6 @@ router.post('/setpassword', async (req, res, next) => {
       await sendMailAsync(mailOptions)
 
       await transaction.commit()
-      // console.log('근데 문제는 이 메세지가 뜨면 안됨 뜨면 망함 ㅇㅇ')
       res.status(200).json({ success: true, message: '임시 비밀번호가 이메일로 전송되었습니다.' })
    } catch (error) {
       await transaction.rollback()
