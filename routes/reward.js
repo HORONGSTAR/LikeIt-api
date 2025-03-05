@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const multer = require('multer')
-const { Reward, RewardProduct, RewardProductRelation, Project } = require('../models')
+const { Reward, RewardProduct, RewardProductRelation, Project, Order } = require('../models')
 const { isCreator } = require('./middlewares')
 const fs = require('fs')
 const path = require('path')
@@ -41,24 +41,63 @@ router.get('/:id', async (req, res) => {
          where: { id: req.params.id },
          attributes: [],
          include: [
-            { model: RewardProduct },
+            // { model: RewardProduct },
             {
                model: Reward,
-               include: [{ model: RewardProduct, attributes: ['id', 'title'] }],
+               include: [
+                  { model: RewardProduct, attributes: ['id', 'title'] },
+                  { model: Order, attributes: ['id', 'rewardId', 'orderCount'] },
+               ],
             },
          ],
       })
 
+      const rewardProductsResult = project.Rewards.map((reward) => reward.RewardProducts)
+      const rewardProducts = rewardProductsResult.flatMap((group) => group.map((product) => product))
+
+      console.log(rewardProductsResult)
+      console.log(rewardProducts)
+
       res.json({
          success: true,
          message: '프로젝트 조회 성공',
-         reward: { RewardProducts: project.RewardProducts, Rewards: project.Rewards },
+         reward: { Rewards: project.Rewards, rewardProducts },
       })
    } catch (error) {
       console.error('프로젝트 조회 오류:', error)
       res.status(500).json({ success: false, message: '프로젝트를 불러오는 중 오류가 발생했습니다.' })
    }
 })
+
+// router.get('/rewardProduct/:id', async (req, res) => {
+//    try {
+//       const project = await Project.findOne({
+//          where: { id: req.params.id },
+//          attributes: [],
+//          include: [
+//             // { model: RewardProduct },
+//             {
+//                model: Reward,
+//                include: [
+//                   { model: RewardProduct, attributes: ['id', 'title'] },
+//                   { model: Order, attributes: ['id', 'rewardId', 'orderCount'] },
+//                ],
+//             },
+//          ],
+//       })
+
+//       project.Rewards
+
+//       res.json({
+//          success: true,
+//          message: '프로젝트 조회 성공',
+//          reward: { Rewards: project.Rewards },
+//       })
+//    } catch (error) {
+//       console.error('프로젝트 조회 오류:', error)
+//       res.status(500).json({ success: false, message: '프로젝트를 불러오는 중 오류가 발생했습니다.' })
+//    }
+// })
 
 // 선물 구성품 생성
 router.post('/product/:id', upload.single('image'), async (req, res) => {
