@@ -90,6 +90,7 @@ module.exports = (server, sessionMiddleware) => {
       socket.on('end space', (studioId) => {
          if (studio[studioId]?.admin?.id === user?.id) {
             socket.leave(studioId)
+            io.to(studioId).emit('end space', '스페이스 종료')
             delete studio[studioId]
          }
       })
