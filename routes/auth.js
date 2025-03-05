@@ -31,7 +31,7 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
          if (exPhoneUser.password) {
             return res.status(409).json({
                success: false,
-               message: '동일한 정보로 가입한 사용자가 있습니다.',
+               message: '중복가입할 수 없습니다.',
             })
          } else {
             //user정보 update
@@ -60,7 +60,6 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
          }
 
          newUser = await User.create({
-            isSignupComplete: true,
             email: email,
             phone: phone,
             name: nickname,
@@ -69,7 +68,7 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
          })
       }
 
-      res.status(201).json({
+      res.json({
          success: true,
          message: '사용자가 성공적으로 등록되었습니다.',
          isSignupComplete: true,
@@ -163,16 +162,6 @@ router.get('/google/callback', isNotLoggedIn, (req, res, next) => {
             })
          }
 
-         //로그인 성공시
-         //status code를 주지 않으면 기본값은 200
-         // res.json({
-         //    success: true,
-         //    message: '로그인 성공',
-         //    user: {
-         //       id: user.id,
-         //       name: user.name,
-         //    },
-         // })
          res.redirect(`${process.env.FRONTEND_APP_URL}`)
       })
    })(req, res, next)
@@ -205,16 +194,6 @@ router.get('/kakao/callback', isNotLoggedIn, (req, res, next) => {
             })
          }
 
-         //로그인 성공시
-         //status code를 주지 않으면 기본값은 200
-         // res.json({
-         //    success: true,
-         //    message: '로그인 성공',
-         //    user: {
-         //       id: user.id,
-         //       name: user.name,
-         //    },
-         // })
          res.redirect(`${process.env.FRONTEND_APP_URL}`)
       })
    })(req, res, next)
@@ -272,8 +251,6 @@ router.get('/logout', isLoggedIn, async (req, res, next) => {
    //사용자를 로그아웃 상태로 바꿈
    req.logout((err) => {
       if (err) {
-         //로그아웃 상태로 바꾸는 중 에러가 났을 때
-         console.log(err)
          return res.status(500).json({
             success: false,
             message: '로그아웃 중 오류가 발생했습니다.',
@@ -400,7 +377,6 @@ router.post('/setpassword', async (req, res, next) => {
       await sendMailAsync(mailOptions)
 
       await transaction.commit()
-      // console.log('근데 문제는 이 메세지가 뜨면 안됨 뜨면 망함 ㅇㅇ')
       res.status(200).json({ success: true, message: '임시 비밀번호가 이메일로 전송되었습니다.' })
    } catch (error) {
       await transaction.rollback()
@@ -413,6 +389,13 @@ router.post('/setpassword', async (req, res, next) => {
 router.post('/email', async (req, res) => {
    try {
       const user = await User.findOne({ where: { phone: req.body.trimmedPhone } })
+
+      if (!user) {
+         return res.status(404).json({
+            success: false,
+            message: '가입한 회원을 찾을 수 없습니다.',
+         })
+      }
       res.json({
          success: true,
          email: user.email,
@@ -425,7 +408,7 @@ router.post('/email', async (req, res) => {
 })
 
 //이메일 변경
-router.put('/changeemail', async (req, res, next) => {
+router.put('/changeemail', isLoggedIn, async (req, res, next) => {
    const user = await User.findOne({ where: { id: req.user.id } })
 
    const { email } = req.body
@@ -442,7 +425,7 @@ router.put('/changeemail', async (req, res, next) => {
 })
 
 //비밀번호 변경
-router.put('/changepassword', async (req, res, next) => {
+router.put('/changepassword', isLoggedIn, async (req, res, next) => {
    async function isCurrentPasswordCorrect(plainPassword, hashedPassword) {
       try {
          const match = await bcrypt.compare(plainPassword, hashedPassword)
@@ -454,6 +437,13 @@ router.put('/changepassword', async (req, res, next) => {
    }
    try {
       const user = await User.findOne({ where: { id: req.user.id } })
+
+      if (!user.password) {
+         return res.status(404).json({
+            success: false,
+            message: '소셜로그인한 회원은 비밀번호 변경이 불가능합니다.',
+         })
+      }
 
       const { currentPassword, passwordToChange } = req.body
 

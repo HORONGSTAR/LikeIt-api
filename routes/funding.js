@@ -432,7 +432,6 @@ router.post('/order', isLoggedIn, async (req, res) => {
             { where: { id: userId }, transaction }
          )
       }
-      console.log(totalPrice)
       // 포인트 적립
       await Point.create(
          {

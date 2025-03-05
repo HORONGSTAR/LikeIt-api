@@ -12,7 +12,6 @@ module.exports = () => {
          },
 
          async (accessToken, refreshToken, profile, done) => {
-            console.log('kakao profile', profile)
             try {
                const exUserAccount = await UserAccount.findOne({
                   // 카카오 플랫폼에서 로그인 했고 & profileId필드에 카카오 아이디가 일치할경우
