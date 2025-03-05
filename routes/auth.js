@@ -162,16 +162,6 @@ router.get('/google/callback', isNotLoggedIn, (req, res, next) => {
             })
          }
 
-         //로그인 성공시
-         //status code를 주지 않으면 기본값은 200
-         // res.json({
-         //    success: true,
-         //    message: '로그인 성공',
-         //    user: {
-         //       id: user.id,
-         //       name: user.name,
-         //    },
-         // })
          res.redirect(`${process.env.FRONTEND_APP_URL}`)
       })
    })(req, res, next)
@@ -204,16 +194,6 @@ router.get('/kakao/callback', isNotLoggedIn, (req, res, next) => {
             })
          }
 
-         //로그인 성공시
-         //status code를 주지 않으면 기본값은 200
-         // res.json({
-         //    success: true,
-         //    message: '로그인 성공',
-         //    user: {
-         //       id: user.id,
-         //       name: user.name,
-         //    },
-         // })
          res.redirect(`${process.env.FRONTEND_APP_URL}`)
       })
    })(req, res, next)
@@ -424,7 +404,7 @@ router.post('/email', async (req, res) => {
 })
 
 //이메일 변경
-router.put('/changeemail', async (req, res, next) => {
+router.put('/changeemail', isLoggedIn, async (req, res, next) => {
    const user = await User.findOne({ where: { id: req.user.id } })
 
    const { email } = req.body
@@ -441,7 +421,7 @@ router.put('/changeemail', async (req, res, next) => {
 })
 
 //비밀번호 변경
-router.put('/changepassword', async (req, res, next) => {
+router.put('/changepassword', isLoggedIn, async (req, res, next) => {
    async function isCurrentPasswordCorrect(plainPassword, hashedPassword) {
       try {
          const match = await bcrypt.compare(plainPassword, hashedPassword)
@@ -453,6 +433,13 @@ router.put('/changepassword', async (req, res, next) => {
    }
    try {
       const user = await User.findOne({ where: { id: req.user.id } })
+
+      if (!user.password) {
+         return res.status(404).json({
+            success: false,
+            message: '소셜로그인한 회원은 비밀번호 변경이 불가능합니다.',
+         })
+      }
 
       const { currentPassword, passwordToChange } = req.body
 
