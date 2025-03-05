@@ -392,6 +392,13 @@ router.post('/setpassword', async (req, res, next) => {
 router.post('/email', async (req, res) => {
    try {
       const user = await User.findOne({ where: { phone: req.body.trimmedPhone } })
+
+      if (!user) {
+         return res.status(404).json({
+            success: false,
+            message: '가입한 회원을 찾을 수 없습니다.',
+         })
+      }
       res.json({
          success: true,
          email: user.email,
