@@ -33,7 +33,7 @@ const upload = multer({
 router.get('/profile', isLoggedIn, async (req, res) => {
    try {
       const user = await User.findOne({ where: { id: req.user.id }, include: { model: Creator, include: Category } })
-      const orders = await Order.findAll({ where: { userId: req.user.id }, include: { model: Reward, include: { model: Project } } })
+      const orders = await Order.findAll({ where: { userId: req.user.id }, include: [{ model: Reward }, { model: Project }] })
       const points = await Point.findAll({ where: { userId: req.user.id } })
       let profits
       if (user.Creator) {
@@ -61,11 +61,11 @@ router.get('/profile', isLoggedIn, async (req, res) => {
 //프로필 수정 (프로필 이미지랑 닉네임)
 router.put('/profile', isLoggedIn, upload.single('img'), async (req, res) => {
    try {
-      console.log('파일정보:', req.file)
-      console.log('req.body:', req.body)
+      const myName = req.user.name
 
-      if (!req.file) {
-         return res.status(400).json({ success: false, message: '파일 업로드에 실패했습니다.' })
+      const exUser = await User.findOne({ where: { name: req.body.name } })
+      if (exUser && exUser.name != myName) {
+         return res.status(409).json({ success: false, message: '동일한 닉네임을 가진 사용자가 있습니다.' })
       }
 
       //게시물 생성
@@ -91,8 +91,6 @@ router.put('/category', isLoggedIn, async (req, res) => {
       if (!selectedCategories) {
          return res.status(400).json({ error: '카테고리가 변경되지 않았습니다.' })
       }
-
-      console.log('selectedCategories:', selectedCategories)
 
       let creator = await Creator.findOne({ where: { userId: req.user.id } })
 

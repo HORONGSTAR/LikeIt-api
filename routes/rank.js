@@ -14,9 +14,8 @@ router.get('/', async (req, res) => {
       const reviewCountRank = await User.findAll({
          limit,
          subQuery: false,
-         attributes: {
-            include: [[Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('DirectReviews.id'))), 'userCount']],
-         },
+         attributes: ['id', 'name', 'imgUrl', [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('DirectReviews.id'))), 'userCount']],
+         where: { role: 'USER' },
          include: [
             {
                model: ProjectReview,
@@ -34,9 +33,9 @@ router.get('/', async (req, res) => {
       const orderCountRank = await User.findAll({
          limit,
          subQuery: false,
-         attributes: {
-            include: [[Sequelize.fn('COUNT', Sequelize.col('Orders.id')), 'userCount']],
-         },
+         attributes: ['id', 'name', 'imgUrl', [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Orders.createdAt'))), 'userCount']],
+         where: { role: 'USER' },
+
          include: [
             {
                model: Order,
@@ -56,9 +55,9 @@ router.get('/', async (req, res) => {
       const orderTopRank = await User.findAll({
          limit,
          subQuery: false,
-         attributes: {
-            include: [[Sequelize.fn('SUM', Sequelize.col('Orders.orderPrice')), 'priceCount']],
-         },
+         attributes: ['id', 'name', 'imgUrl', [Sequelize.fn('SUM', Sequelize.col('Orders.orderPrice')), 'priceCount']],
+         where: { role: 'USER' },
+
          include: [
             {
                model: Order,
@@ -94,10 +93,10 @@ WITH RankedUsers AS (
    SELECT 
       Users.id,
       COUNT(DISTINCT DirectReviews.id) AS reviewCount,
-      COUNT(DISTINCT Orders.id) AS orderCount,
+      COUNT(DISTINCT Orders.createdAt) AS orderCount,
       SUM(Orders.orderPrice) AS priceSum,
       RANK() OVER (ORDER BY COUNT(DISTINCT DirectReviews.id) DESC) AS reviewRank,
-      RANK() OVER (ORDER BY COUNT(DISTINCT Orders.id) DESC) AS orderRank,
+      RANK() OVER (ORDER BY COUNT(DISTINCT Orders.createdAt) DESC) AS orderRank,
       RANK() OVER (ORDER BY SUM(Orders.orderPrice) DESC) AS priceRank
    FROM Users
    LEFT JOIN ProjectReviews AS DirectReviews

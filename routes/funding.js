@@ -1,5 +1,5 @@
 const express = require('express')
-const { sequelize } = require('../models')
+const { sequelize, Point } = require('../models')
 const { Studio, Project, User, Order, Reward, RewardProduct, ProjectBudget, ProjectTimeline, ProjectTimelineComment, ProjectReview } = require('../models')
 const router = express.Router()
 const multer = require('multer')
@@ -347,19 +347,35 @@ router.post('/order', isLoggedIn, async (req, res) => {
    try {
       const userId = req.user.id
       const createdAt = new Date()
-      const { orderPrices, address, account, rewards, projectId, usePoint } = req.body
+      const { orderPrices, address, account, rewards, projectId, usePoint, totalPrice } = req.body
 
-      const orderData = Object.entries(rewards).map(([rewardId, orderCount], index) => ({
-         rewardId: parseInt(rewardId, 10),
-         orderCount,
-         orderPrice: orderPrices[index],
-         address,
-         account,
-         projectId,
-         userId,
-         createdAt,
-         updatedAt: createdAt,
-      }))
+      const pointPj = await Project.findOne({
+         attributes: ['title'],
+         where: {
+            id: projectId,
+         },
+      })
+
+      const orderData = Object.entries(rewards)
+         .map(([rewardId, orderCount], index) => {
+            const orderPrice = orderPrices[index]
+
+            // orderPrice가 0이면 해당 항목을 제외하도록 처리
+            if (orderPrice === 0) return null
+
+            return {
+               rewardId: parseInt(rewardId, 10),
+               orderCount,
+               orderPrice,
+               address,
+               account,
+               projectId,
+               userId,
+               createdAt,
+               updatedAt: createdAt,
+            }
+         })
+         .filter((item) => item !== null)
 
       // 1. 트랜잭션 내에서 각 rewardId의 stock을 체크
       for (let { rewardId, orderCount } of orderData) {
@@ -383,6 +399,7 @@ router.post('/order', isLoggedIn, async (req, res) => {
          },
          { where: { id: { [Sequelize.Op.in]: rewardIds } }, transaction }
       )
+
       await Order.bulkCreate(orderData, { transaction })
 
       if (usePoint) {
@@ -400,6 +417,14 @@ router.post('/order', isLoggedIn, async (req, res) => {
             },
             { transaction }
          )
+         await Point.create(
+            {
+               changePoint: usePoint * -1,
+               changeComment: pointPj.title + ` 프로젝트에 ${usePoint}점 사용하셨습니다.`,
+               userId,
+            },
+            { transaction }
+         )
          await User.update(
             {
                point: Sequelize.literal(`point - ${usePoint}`),
@@ -407,6 +432,21 @@ router.post('/order', isLoggedIn, async (req, res) => {
             { where: { id: userId }, transaction }
          )
       }
+      // 포인트 적립
+      await Point.create(
+         {
+            changePoint: (totalPrice / 100) * 5,
+            changeComment: pointPj.title + ` 프로젝트 후원으로 ${(totalPrice / 100) * 5}점 적립되었습니다.`,
+            userId,
+         },
+         { transaction }
+      )
+      await User.update(
+         {
+            point: Sequelize.literal(`point + ${(totalPrice / 100) * 5}`),
+         },
+         { where: { id: userId }, transaction }
+      )
       await transaction.commit()
       res.json({
          success: true,

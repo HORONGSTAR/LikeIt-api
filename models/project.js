@@ -52,6 +52,7 @@ module.exports = class Project extends Sequelize.Model {
             // 진행상태 (펀딩진행중, 시작대기중, 펀딩성공, 펀딩실패)
             projectStatus: {
                type: Sequelize.ENUM('ON_FUNDING', 'WAITING_FUNDING', 'FUNDING_COMPLETE', 'FUNDING_FAILED'),
+               defaultValue: 'WAITING_FUNDING',
             },
             // 승인상태 (작성중, 승인요청, 승인허가, 승인거부)
             proposalStatus: {

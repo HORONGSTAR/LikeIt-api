@@ -6,7 +6,6 @@ const { isLoggedIn } = require('./middlewares')
 // 댓글 생성
 router.post('/:id', isLoggedIn, async (req, res) => {
    try {
-      console.log(req.params.id)
       await StudioCommunityComment.create({
          comment: req.body.comment,
          communityId: req.params.id,

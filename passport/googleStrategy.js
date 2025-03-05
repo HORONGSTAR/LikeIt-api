@@ -13,9 +13,6 @@ module.exports = () => {
             callbackURL: '/auth/google/callback',
          },
          async (accessToken, refreshToken, profile, done) => {
-            // Handle user profile here (e.g., save to database)
-            console.log('google profile : ', profile)
-            console.log('엑세스토큰:', accessToken)
             try {
                const exUserAccount = await UserAccount.findOne({
                   // 구글 플랫폼에서 로그인 했고 & profileId필드에 구글 아이디가 일치할경우
@@ -27,23 +24,25 @@ module.exports = () => {
                   const exUser = await User.findOne({
                      where: { id: exUserAccount.userId },
                   })
-                  done(null, exUser) // 로그인 인증 완료
+                  done(null, exUser, {
+                     message: '가입된 회원.',
+                  }) // 로그인 인증 완료
                } else {
-                  // 가입되지 않는 유저면
+                  // 가입되지 않는 유저면 가입과정은 auth.js에 있으니 그쪽으로 정보 보내기
                   const tempUserAccount = {
                      profileId: profile.id,
                      accountEmail: profile?.emails[0].value,
                      accountType: 'GOOGLE',
                   }
                   const tempUser = {
-                     email: profile?.emails[0].value, //이게 뭐지??
+                     email: profile?.emails[0].value,
                      name: profile.displayName,
                   }
 
                   done(null, false, {
                      message: '가입되지 않은 회원입니다.',
                      tempThings: { tempUserAccount, tempUser },
-                     redirect: 'http://localhost:3000/additionalsignup',
+                     redirect: `${process.env.FRONTEND_APP_URL}/additionalsignup`,
                   }) // 회원가입하고 로그인 인증 완료
                }
             } catch (error) {
