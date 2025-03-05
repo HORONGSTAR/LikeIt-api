@@ -52,13 +52,13 @@ router.get('/:id', async (req, res) => {
          ],
       })
 
-      const rewardProductsResult = project.Rewards.map((reward) => reward.RewardProducts)
-      const rewardProducts = rewardProductsResult.flatMap((group) => group.map((product) => product))
+      // const rewardProductsResult = project.Rewards.map((reward) => reward.RewardProducts)
+      // const rewardProducts = rewardProductsResult.flatMap((group) => group.map((product) => product))
 
       res.json({
          success: true,
          message: '프로젝트 조회 성공',
-         reward: { Rewards: project.Rewards, rewardProducts },
+         reward: { Rewards: project.Rewards },
       })
    } catch (error) {
       console.error('프로젝트 조회 오류:', error)
