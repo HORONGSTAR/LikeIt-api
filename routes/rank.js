@@ -15,6 +15,7 @@ router.get('/', async (req, res) => {
          limit,
          subQuery: false,
          attributes: ['id', 'name', 'imgUrl', [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('DirectReviews.id'))), 'userCount']],
+         where: { role: 'USER' },
          include: [
             {
                model: ProjectReview,
@@ -33,6 +34,8 @@ router.get('/', async (req, res) => {
          limit,
          subQuery: false,
          attributes: ['id', 'name', 'imgUrl', [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Orders.createdAt'))), 'userCount']],
+         where: { role: 'USER' },
+
          include: [
             {
                model: Order,
@@ -53,6 +56,8 @@ router.get('/', async (req, res) => {
          limit,
          subQuery: false,
          attributes: ['id', 'name', 'imgUrl', [Sequelize.fn('SUM', Sequelize.col('Orders.orderPrice')), 'priceCount']],
+         where: { role: 'USER' },
+
          include: [
             {
                model: Order,

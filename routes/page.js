@@ -61,11 +61,10 @@ router.get('/profile', isLoggedIn, async (req, res) => {
 //프로필 수정 (프로필 이미지랑 닉네임)
 router.put('/profile', isLoggedIn, upload.single('img'), async (req, res) => {
    try {
-      console.log('파일정보:', req.file)
-      console.log('req.body:', req.body)
+      const myName = req.user.name
 
       const exUser = await User.findOne({ where: { name: req.body.name } })
-      if (exUser) {
+      if (exUser && exUser.name != myName) {
          return res.status(409).json({ success: false, message: '동일한 닉네임을 가진 사용자가 있습니다.' })
       }
 
