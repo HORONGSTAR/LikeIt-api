@@ -27,6 +27,7 @@ module.exports = (server, sessionMiddleware) => {
    })
 
    const studio = {}
+   const socketId = {}
    const today = new Date()
 
    io.on('connection', (socket) => {
@@ -34,8 +35,10 @@ module.exports = (server, sessionMiddleware) => {
       console.log(`${user.id}번 유저 서버 연결.`)
 
       socket.on('space info', (studioId) => {
+         socket.join(studioId)
+         socketId[user.id] = socket.id
          if (studio[studioId]) {
-            socket.emit('space info', studio[studioId])
+            io.to(studioId).emit('space info', studio[studioId])
          }
       })
 
@@ -43,34 +46,34 @@ module.exports = (server, sessionMiddleware) => {
          if (!studio[studioId]) {
             const { id, name, imgUrl } = user
             studio[studioId] = {
-               admin: { id, name, imgUrl, socketId: socket.id },
+               id: id,
+               admin: { name, imgUrl },
                users: {},
                startTime: today,
             }
-            socket.emit('space info', studio[studioId])
+            io.to(studioId).emit('space info', studio[studioId])
          }
       })
 
-      socket.on('join space', (studioId) => {
+      socket.on('enter space', (studioId) => {
          if (studio[studioId]) {
             const { id, name, imgUrl } = user
-            socket.join(studioId)
             studio[studioId].users[id] = { name, imgUrl }
-            const broadcasterId = studio[studioId].admin.socketId
-            io.to(broadcasterId).emit('new listener', socket.id)
+            const broadcasterId = socketId[studio[studioId].id]
+            io.to(broadcasterId).emit('new listener', { listenerId: user.id })
          }
       })
 
       socket.on('offer', ({ offer, listenerId }) => {
-         io.to(listenerId).emit('offer', { offer, broadcasterId: socket.id })
+         io.to(socketId[listenerId]).emit('offer', { offer, broadcasterId: user.id })
       })
 
       socket.on('answer', ({ answer, broadcasterId }) => {
-         io.to(broadcasterId).emit('answer', { answer, listenerId: socket.id })
+         io.to(socketId[broadcasterId]).emit('answer', { answer, listenerId: user.id })
       })
 
       socket.on('ice-candidate', ({ targetId, candidate }) => {
-         io.to(targetId).emit('ice-candidate', { candidate })
+         io.to(socketId[targetId]).emit('ice-candidate', { candidate })
       })
 
       socket.on('chat message', (msg, studioId) => {
@@ -82,20 +85,21 @@ module.exports = (server, sessionMiddleware) => {
 
       socket.on('leave space', (studioId) => {
          if (studio[studioId]) {
-            socket.leave(studioId)
+            const broadcasterId = socketId[studio[studioId].id]
+            io.to(broadcasterId).emit('leave listener', { listenerId: user.id })
+            io.to(socket.id).emit('leave space', '스페이스 퇴장')
             delete studio[studioId].users[user?.id]
          }
       })
 
       socket.on('end space', (studioId) => {
-         if (studio[studioId]?.admin?.id === user?.id) {
-            socket.leave(studioId)
+         if (studio[studioId]?.id === user?.id) {
             io.to(studioId).emit('end space', '스페이스 종료')
             delete studio[studioId]
          }
       })
 
-      socket.on('disconnect', (studioId) => {
+      socket.on('disconnect', () => {
          console.log(`${user.id}번 유저 연결 해제.`)
          return socket.disconnect()
       })
