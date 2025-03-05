@@ -166,7 +166,13 @@ router.put('/:id', isCreator, upload.single('image'), async (req, res) => {
 // 특정 스튜디오 조회
 router.get('/:id', async (req, res) => {
    try {
+      let userId = 0
+      if (req.user) userId = req.user.id
+
       const studio = await Studio.findOne({
+         attributes: {
+            include: [[Sequelize.literal(`(SELECT COUNT(*) FROM StudioFavorite WHERE StudioFavorite.studioId = Studio.id AND StudioFavorite.userId = ${userId})`), 'isFollowing']],
+         },
          where: { id: req.params.id },
          include: [
             {
@@ -215,6 +221,48 @@ router.get('/:id', async (req, res) => {
    } catch (error) {
       console.error('스튜디오 조회 오류:', error)
       res.status(500).json({ success: false, message: '스튜디오를 불러오는 중 오류가 발생했습니다.' })
+   }
+})
+
+// 구독
+router.post('/follow/:id', async (req, res) => {
+   try {
+      const userId = req.user.id
+      const studioId = req.params.id
+
+      const user = await User.findByPk(userId)
+      const studio = await Studio.findByPk(studioId)
+
+      await user.addStudios(studio)
+
+      res.json({
+         success: true,
+         message: '스튜디오 구독 성공',
+      })
+   } catch (error) {
+      console.error(error)
+      res.status(500).json({ success: false, message: '스튜디오를 구독하는데 문제가 발생했습니다.' })
+   }
+})
+
+// 구독 취소
+router.delete('/unfollow/:id', async (req, res) => {
+   try {
+      const userId = req.user.id
+      const studioId = req.params.id
+
+      const user = await User.findByPk(userId)
+      const studio = await Studio.findByPk(studioId)
+
+      await user.removeStudios(studio)
+
+      res.json({
+         success: true,
+         message: '스튜디오 구독 해제 성공',
+      })
+   } catch (error) {
+      console.error(error)
+      res.status(500).json({ success: false, message: '스튜디오 구독을 해제하는데 문제가 발생했습니다.' })
    }
 })
 

@@ -60,7 +60,6 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
          }
 
          newUser = await User.create({
-            isSignupComplete: true,
             email: email,
             phone: phone,
             name: nickname,
