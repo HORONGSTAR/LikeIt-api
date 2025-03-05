@@ -31,7 +31,7 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
          if (exPhoneUser.password) {
             return res.status(409).json({
                success: false,
-               message: '동일한 정보로 가입한 사용자가 있습니다.',
+               message: '중복가입할 수 없습니다.',
             })
          } else {
             //user정보 update
@@ -68,7 +68,7 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
          })
       }
 
-      res.status(201).json({
+      res.json({
          success: true,
          message: '사용자가 성공적으로 등록되었습니다.',
          isSignupComplete: true,
