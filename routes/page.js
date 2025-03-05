@@ -95,7 +95,6 @@ router.put('/category', isLoggedIn, async (req, res) => {
       let creator = await Creator.findOne({ where: { userId: req.user.id } })
 
       if (!creator) {
-         //  return res.status(400).json({ error: 'creator가 아닙니다.' })
          creator = await Creator.create({ userId: req.user.id, profit: 0 })
       }
 
@@ -112,19 +111,5 @@ router.put('/category', isLoggedIn, async (req, res) => {
       res.status(500).json({ success: false, message: '프로필 수정 중 오류가 발생했습니다.', error })
    }
 })
-
-// router.get('/sponsor', isLoggedIn, async (req, res) => {
-//    try {
-//       const user = await User.findOne({ where: { id: req.user.id }, include: { model: Order, include: { model: Project } } })
-//       res.json({
-//          success: true,
-//          user: user,
-//          message: '후원유전자자 정보를 성공적으로 가져왔습니다.',
-//       })
-//    } catch (error) {
-//       console.error(error)
-//       res.status(500).json({ success: false, message: ' 중 오류가 발생했습니다.', error })
-//    }
-// })
 
 module.exports = router

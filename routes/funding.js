@@ -238,7 +238,10 @@ router.get('/reviews/:id', async (req, res) => {
                // 추천 수 계산
                [Sequelize.literal(`(SELECT COUNT(*) FROM ProjectReviewRecommend WHERE ProjectReviewRecommend.reviewId = ProjectReview.id)`), 'recommendCount'],
                // 사용자가 추천했는지 여부 확인
-               [Sequelize.literal(`(SELECT COUNT(*) FROM ProjectReviewRecommend WHERE ProjectReviewRecommend.reviewId = ProjectReview.id AND ProjectReviewRecommend.userId = ${userId})`), 'isRecommended'],
+               [
+                  Sequelize.literal(`(SELECT COUNT(*) FROM ProjectReviewRecommend WHERE ProjectReviewRecommend.reviewId = ProjectReview.id AND ProjectReviewRecommend.userId = ${userId})`),
+                  'isRecommended',
+               ],
             ],
          },
          order: [[Sequelize.literal(`(SELECT COUNT(*) FROM ProjectReviewRecommend WHERE ProjectReviewRecommend.reviewId = ProjectReview.id)`), 'DESC']],
